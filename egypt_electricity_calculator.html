@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة شرائح الكهرباء المصرية</title>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --bg2:#eef3fa;
+    --card:#ffffff;
+    --border:#e4eaf3;
+    --text:#1c2438;
+    --muted:#6b7690;
+    --accent:#2f6fed;
+    --accent-soft:#eaf1ff;
+    --good:#1aa877;
+    --warn:#e08b1e;
+    --danger:#e0453c;
+    --danger-soft:#fdecea;
+    --radius:18px;
+    --shadow:0 6px 24px rgba(30,45,90,.07), 0 1px 3px rgba(30,45,90,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1000px 400px at 15% -10%, #e7f0ff 0%, transparent 60%),
+      radial-gradient(900px 380px at 100% 0%, #eafcf3 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:"Segoe UI","Tahoma","Cairo",Arial,sans-serif;
+    line-height:1.75;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+
+  .hero{text-align:center; padding:18px 10px 30px;}
+  .hero .icon{font-size:2.6rem; margin-bottom:6px;}
+  .hero h1{font-size:1.9rem; margin:0 0 10px; font-weight:800; letter-spacing:-.3px;}
+  .hero p{color:var(--muted); font-size:1.02rem; max-width:620px; margin:0 auto;}
+
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:26px 26px; margin-bottom:24px;
+  }
+  .card h2{margin:0 0 6px; font-size:1.25rem; font-weight:800;}
+  .card .desc{color:var(--muted); font-size:.92rem; margin:0 0 20px;}
+
+  /* Section A: mechanism cards */
+  .mech-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media (max-width:760px){.mech-grid{grid-template-columns:1fr;}}
+  .mech-card{
+    border-radius:14px; padding:18px; border:1px solid var(--border);
+  }
+  .mech-card.cum{background:#f0f8f3; border-color:#cdeadb;}
+  .mech-card.reset{background:#fff6ec; border-color:#f6ddb8;}
+  .mech-card.flat{background:var(--danger-soft); border-color:#f4c9c5;}
+  .mech-card .tag{font-weight:800; font-size:.98rem; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+  .mech-card p{margin:0; font-size:.87rem; color:#41485c;}
+
+  /* Section B: tier table */
+  table{width:100%; border-collapse:collapse; font-size:.9rem;}
+  th,td{padding:12px 8px; text-align:center; border-bottom:1px solid var(--border);}
+  th{color:var(--muted); font-weight:700; font-size:.78rem; background:var(--bg2);}
+  tr:last-child td{border-bottom:none;}
+  td.desc-cell{font-size:.8rem; color:var(--muted); text-align:right;}
+  .pill{display:inline-block; padding:4px 12px; border-radius:999px; font-size:.76rem; font-weight:800;}
+  .pill.cum{background:#e3f6ea; color:var(--good);}
+  .pill.reset{background:#fdedd6; color:var(--warn);}
+  .pill.flat{background:var(--danger-soft); color:var(--danger);}
+
+  /* Section C: shock moment */
+  .shock-hero{
+    display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap;
+    background:linear-gradient(135deg,#fff8f0,#fff3f2);
+    border:1px solid #f6dfd2; border-radius:16px; padding:26px; margin-bottom:18px;
+  }
+  .shock-box{text-align:center; min-width:150px;}
+  .shock-box .kwh{font-size:.85rem; color:var(--muted); margin-bottom:4px;}
+  .shock-box .price{font-size:1.9rem; font-weight:900;}
+  .shock-arrow{font-size:1.8rem; color:var(--danger);}
+  .shock-diff{
+    background:var(--danger); color:#fff; border-radius:999px; padding:10px 22px;
+    font-weight:900; font-size:1.05rem; box-shadow:0 6px 16px rgba(224,69,60,.35);
+  }
+  .shock-note{color:var(--muted); font-size:.88rem; text-align:center; margin-top:6px;}
+
+  .three-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px;}
+  @media (max-width:760px){.three-grid{grid-template-columns:1fr;}}
+  .mini-shock{
+    background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center;
+  }
+  .mini-shock .lbl{font-size:.78rem; color:var(--muted); margin-bottom:8px;}
+  .mini-shock .from-to{font-size:.95rem; font-weight:700; margin-bottom:6px;}
+  .mini-shock .jump{font-size:1.15rem; font-weight:900; color:var(--danger);}
+
+  /* Section D: slider */
+  .slider-wrap{padding:6px 4px 4px;}
+  .slider-readout{
+    display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px; flex-wrap:wrap; gap:14px;
+  }
+  .slider-readout .big{font-size:2.4rem; font-weight:900;}
+  .slider-readout .big span{font-size:1.1rem; font-weight:700; color:var(--muted);}
+  .tier-badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--accent-soft); color:var(--accent);
+    padding:8px 16px; border-radius:999px; font-weight:800; font-size:.95rem;
+  }
+  .track-outer{position:relative; height:34px; margin:10px 0 8px;}
+  .track-bg{
+    position:absolute; inset:0; border-radius:999px; overflow:hidden; display:flex;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.08);
+  }
+  .track-seg{height:100%;}
+  #kwhRange{
+    position:absolute; inset:0; width:100%; height:34px; margin:0; opacity:0; cursor:pointer;
+  }
+  .thumb{
+    position:absolute; top:50%; width:26px; height:26px; border-radius:50%;
+    background:#fff; border:4px solid var(--accent); box-shadow:0 3px 10px rgba(0,0,0,.2);
+    transform:translate(-50%,-50%); pointer-events:none; transition:left .05s linear;
+  }
+  .track-labels{display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); padding:0 2px;}
+  .slider-bill{
+    margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  @media (max-width:600px){.slider-bill{grid-template-columns:1fr;}}
+  .slider-bill .box{background:var(--bg2); border-radius:12px; padding:14px 16px; text-align:center;}
+  .slider-bill .box .l{font-size:.78rem; color:var(--muted); margin-bottom:4px;}
+  .slider-bill .box .v{font-size:1.3rem; font-weight:900;}
+  .warn-strip{
+    margin-top:14px; background:var(--danger-soft); border:1px solid #f4c9c5; color:#9a2f28;
+    border-radius:12px; padding:12px 16px; font-size:.88rem; font-weight:700; display:none;
+    align-items:center; gap:8px;
+  }
+  .warn-strip.show{display:flex;}
+
+  /* Section E: calculator */
+  .calc-grid{display:grid; grid-template-columns:1fr; gap:14px; max-width:340px;}
+  label{display:block; font-size:.85rem; color:var(--muted); margin-bottom:6px; font-weight:700;}
+  input[type=number]{
+    width:100%; padding:13px 14px; border-radius:12px; border:1.5px solid var(--border);
+    background:var(--bg2); color:var(--text); font-size:1.1rem; font-weight:700;
+  }
+  input[type=number]:focus{outline:none; border-color:var(--accent); background:#fff;}
+  .calc-results{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px;}
+  @media (max-width:640px){.calc-results{grid-template-columns:1fr;}}
+  .res-box{background:var(--bg2); border-radius:14px; padding:16px; text-align:center; border:1px solid var(--border);}
+  .res-box .l{font-size:.8rem; color:var(--muted); margin-bottom:6px;}
+  .res-box .v{font-size:1.3rem; font-weight:900;}
+  .res-box.accent{border-color:#cddcfb; background:var(--accent-soft);}
+  .res-box.accent .v{color:var(--accent);}
+  .res-box.danger{border-color:#f4c9c5; background:var(--danger-soft);}
+  .res-box.danger .v{color:var(--danger);}
+
+  footer{text-align:center; color:var(--muted); font-size:.78rem; margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="icon">⚡</div>
+    <h1>حاسبة شرائح الكهرباء المصرية</h1>
+    <p>افهم فاتورتك صح، وشوف بنفسك ليه أحيانًا كيلوواط واحد زيادة بيرفعلك الفاتورة بمبلغ كبير مش متوقع.</p>
+  </div>
+
+  <div class="card">
+    <h2>إزاي التسعيرة شغالة فعليًا؟</h2>
+    <p class="desc">التسعيرة مقسّمة 7 شرائح، لكن مش كل الشرائح بتتحسب بنفس الطريقة — وده أهم حاجة لازم تفهمها.</p>
+    <div class="mech-grid">
+      <div class="mech-card cum">
+        <div class="tag">🟢 تراكمي عادي</div>
+        <p>كل شريحة بتاخد سعرها بس على الجزء اللي وقع فيها، والباقي زي ما هو. (الشرائح 1، 2، 4، 5)</p>
+      </div>
+      <div class="mech-card reset">
+        <div class="tag">🟠 مسح وإعادة حساب</div>
+        <p>بمجرد ما تدخل الشريحة دي، بيتم إلغاء كل الحساب السابق، ويتحسب <b>كل</b> استهلاكك من الصفر بسعرها هي. (الشريحتان 3 و6)</p>
+      </div>
+      <div class="mech-card flat">
+        <div class="tag">🔴 سعر ثابت مطلق</div>
+        <p>إلغاء نهائي لأي دعم، وكل الكمية بتتحسب بسعر واحد موحّد من الصفر. (الشريحة 7)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>جدول الشرائح الحالي</h2>
+    <table>
+      <thead>
+        <tr><th>الشريحة</th><th>النطاق (ك.و.س)</th><th>السعر (ج/ك.و.س)</th><th>الرسوم الإدارية</th><th>طريقة الحساب</th></tr>
+      </thead>
+      <tbody id="tierTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>⚡ لحظة الصدمة: أول ما تدخل الشريحة الثالثة</h2>
+    <p class="desc">مثال حقيقي: عندك 100 كيلوواط استهلاك، وزودت كيلوواط واحد بس ليبقى 101. شوف إيه اللي بيحصل للفاتورة:</p>
+
+    <div class="shock-hero">
+      <div class="shock-box">
+        <div class="kwh">عند 100 كيلوواط</div>
+        <div class="price" id="shockBefore">—</div>
+      </div>
+      <div class="shock-arrow">⟵</div>
+      <div class="shock-diff" id="shockDiff">—</div>
+      <div class="shock-arrow">⟵</div>
+      <div class="shock-box">
+        <div class="kwh">عند 101 كيلوواط (+1 بس)</div>
+        <div class="price" id="shockAfter">—</div>
+      </div>
+    </div>
+    <p class="shock-note">كيلوواط واحد إضافي كلفته الحقيقية 1.06 جنيه بس — لكن لأنه فتح باب الشريحة الثالثة، كل الـ101 كيلوواط اتحسبوا من الصفر بسعرها، فالفاتورة قفزت بمبلغ أكبر بكتير من قيمة الكيلوواط نفسه.</p>
+
+    <div class="three-grid">
+      <div class="mini-shock">
+        <div class="lbl">دخول الشريحة 3</div>
+        <div class="from-to">100 ⟵ 101 ك.و.س</div>
+        <div class="jump" id="j1">—</div>
+      </div>
+      <div class="mini-shock">
+        <div class="lbl">دخول الشريحة 6</div>
+        <div class="from-to">650 ⟵ 651 ك.و.س</div>
+        <div class="jump" id="j2">—</div>
+      </div>
+      <div class="mini-shock">
+        <div class="lbl">دخول الشريحة 7</div>
+        <div class="from-to">1000 ⟵ 1001 ك.و.س</div>
+        <div class="jump" id="j3">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎚️ السلايدر التفاعلي</h2>
+    <p class="desc">حرّك السلايدر وشوف الشريحة والفاتورة بتتغير لحظيًا — والألوان بتقولك انت داخل في نوع حساب إيه.</p>
+
+    <div class="slider-wrap">
+      <div class="slider-readout">
+        <div class="big"><span id="sliderKwhLabel">0</span> <span>كيلوواط/ساعة</span></div>
+        <div class="tier-badge" id="sliderTierBadge">الشريحة 1</div>
+      </div>
+
+      <div class="track-outer">
+        <div class="track-bg" id="trackBg"></div>
+        <input type="range" id="kwhRange" min="0" max="1300" step="1" value="300">
+        <div class="thumb" id="thumb"></div>
+      </div>
+      <div class="track-labels">
+        <span>0</span><span>1300+ ك.و.س</span>
+      </div>
+
+      <div class="slider-bill">
+        <div class="box">
+          <div class="l">إجمالي الفاتورة (شامل الرسوم)</div>
+          <div class="v" id="sliderBill">0 ج</div>
+        </div>
+        <div class="box">
+          <div class="l">متوسط سعر الكيلوواط الفعلي</div>
+          <div class="v" id="sliderAvg">0 ج</div>
+        </div>
+      </div>
+
+      <div class="warn-strip" id="warnStrip">⚠️ <span id="warnText"></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧮 الحاسبة</h2>
+    <p class="desc">دخّل استهلاكك بالكيلوواط/ساعة (تلاقيه في تطبيق شركة الكهرباء أو رسالة الشحن) واعرف تفاصيل فاتورتك.</p>
+    <div class="calc-grid">
+      <div>
+        <label for="kwhInput">الاستهلاك (كيلوواط/ساعة)</label>
+        <input type="number" id="kwhInput" value="450" min="0" step="1">
+      </div>
+    </div>
+
+    <div class="calc-results">
+      <div class="res-box">
+        <div class="l">الشريحة الحالية</div>
+        <div class="v" id="calcTier">—</div>
+      </div>
+      <div class="res-box accent">
+        <div class="l">قيمة الاستهلاك</div>
+        <div class="v" id="calcConsumption">—</div>
+      </div>
+      <div class="res-box">
+        <div class="l">الرسوم الإدارية</div>
+        <div class="v" id="calcFee">—</div>
+      </div>
+    </div>
+    <div class="calc-results" style="margin-top:12px;">
+      <div class="res-box danger" style="grid-column:1 / -1;">
+        <div class="l">الإجمالي المطلوب دفعه</div>
+        <div class="v" id="calcTotal" style="font-size:1.6rem;">—</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    حاسبة مرجعية مبنية على شرائح استهلاك المنازل الرسمية الحالية. الأرقام للتوضيح والفهم، ولأي استفسار دقيق راجع فاتورتك أو شركة التوزيع التابع لها.
+  </footer>
+</div>
+
+<script>
+const TIERS = [
+  {n:1, lo:0,   hi:50,   price:0.68, fee:1,  mode:'cum',  label:'0 – 50',    color:'#a9e6c4'},
+  {n:2, lo:51,  hi:100,  price:0.87, fee:2,  mode:'cum',  label:'51 – 100',  color:'#ffe08a'},
+  {n:3, lo:101, hi:200,  price:1.06, fee:6,  mode:'reset',label:'101 – 200', color:'#ffbf86'},
+  {n:4, lo:201, hi:350,  price:1.74, fee:11, mode:'cum',  label:'201 – 350', color:'#9fc7ff'},
+  {n:5, lo:351, hi:650,  price:2.18, fee:15, mode:'cum',  label:'351 – 650', color:'#c3b2ff'},
+  {n:6, lo:651, hi:1000, price:2.35, fee:25, mode:'reset',label:'651 – 1000',color:'#ff9d9d'},
+  {n:7, lo:1001,hi:Infinity, price:2.89, fee:40, mode:'flat', label:'أكثر من 1000', color:'#ef6a6a'}
+];
+const MECH_TEXT = {
+  cum:  {pill:'cum',   short:'تراكمي عادي'},
+  reset:{pill:'reset', short:'مسح وإعادة حساب'},
+  flat: {pill:'flat',  short:'سعر ثابت مطلق'}
+};
+const SLIDER_MAX = 1300;
+
+function fmt(n){ return n.toLocaleString('ar-EG',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function tierOf(X){ return TIERS.find(t => X>=t.lo && X<=t.hi) || TIERS[TIERS.length-1]; }
+
+function actualCostNoFee(X){
+  const tier = tierOf(X);
+  if(tier.mode==='cum'){
+    const idx = TIERS.indexOf(tier);
+    let base=0, prevHi=0;
+    for(let i=0;i<idx;i++){
+      const tt=TIERS[i];
+      if(tt.mode==='reset'){ base = tt.hi*tt.price; }
+      else if(tt.mode==='cum'){ base += (tt.hi-prevHi)*tt.price; }
+      prevHi = tt.hi;
+    }
+    return base + (X-prevHi)*tier.price;
+  } else {
+    return X*tier.price;
+  }
+}
+function billOf(X){
+  const tier = tierOf(X);
+  return actualCostNoFee(X) + tier.fee;
+}
+
+/* ---------- Section B: tier table ---------- */
+function buildTierTable(){
+  const body = document.getElementById('tierTableBody');
+  body.innerHTML='';
+  TIERS.forEach(t=>{
+    const m = MECH_TEXT[t.mode];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><b>${t.n}</b></td>
+      <td>${t.label}</td>
+      <td>${t.price.toFixed(2)}</td>
+      <td>${t.fee} ج</td>
+      <td><span class="pill ${m.pill}">${m.short}</span></td>`;
+    body.appendChild(tr);
+  });
+}
+
+/* ---------- Section C: shock moment ---------- */
+function buildShock(){
+  const before = billOf(100), after = billOf(101);
+  document.getElementById('shockBefore').textContent = fmt(before)+' ج';
+  document.getElementById('shockAfter').textContent = fmt(after)+' ج';
+  document.getElementById('shockDiff').textContent = '+ '+fmt(after-before)+' جنيه';
+
+  const pairs = [[100,101,'j1'],[650,651,'j2'],[1000,1001,'j3']];
+  pairs.forEach(([a,b,id])=>{
+    const jump = billOf(b)-billOf(a);
+    document.getElementById(id).textContent = '+'+fmt(jump)+' ج';
+  });
+}
+
+/* ---------- Section D: slider ---------- */
+function buildTrackBg(){
+  const track = document.getElementById('trackBg');
+  track.innerHTML='';
+  TIERS.forEach(t=>{
+    const hi = t.hi===Infinity ? SLIDER_MAX : t.hi;
+    const lo = t.n===1 ? 0 : t.lo-1;
+    const widthPct = Math.max(0, (Math.min(hi,SLIDER_MAX)-lo))/SLIDER_MAX*100;
+    const seg = document.createElement('div');
+    seg.className='track-seg';
+    seg.style.width = widthPct+'%';
+    seg.style.background = t.color;
+    track.appendChild(seg);
+  });
+}
+
+function updateSlider(){
+  const X = parseInt(document.getElementById('kwhRange').value,10);
+  const tier = tierOf(X);
+  document.getElementById('sliderKwhLabel').textContent = X.toLocaleString('ar-EG');
+  document.getElementById('sliderTierBadge').textContent = 'الشريحة '+tier.n+' · '+MECH_TEXT[tier.mode].short;
+  const bill = billOf(X);
+  document.getElementById('sliderBill').textContent = fmt(bill)+' ج';
+  document.getElementById('sliderAvg').textContent = (X>0 ? fmt(bill/X) : '0.00')+' ج/ك.و.س';
+
+  const pct = Math.min(100, (X/SLIDER_MAX)*100);
+  /* track is RTL: 0 at the right edge, max at the left edge */
+  document.getElementById('thumb').style.left = (100-pct)+'%';
+
+  /* warn strip: how close to next reset/flat boundary */
+  const nextResetBoundaries = [101, 651, 1001];
+  const upcoming = nextResetBoundaries.find(b => X < b && (b-X)<=15);
+  const warn = document.getElementById('warnStrip');
+  if(upcoming){
+    const jump = billOf(upcoming) - billOf(upcoming-1);
+    document.getElementById('warnText').textContent =
+      `باقيلك ${upcoming - X} كيلوواط بس وهتدخل شريحة جديدة بيتحسب فيها كل استهلاكك من الصفر — هتدفع فجأة +${fmt(jump)} جنيه زيادة.`;
+    warn.classList.add('show');
+  } else {
+    warn.classList.remove('show');
+  }
+}
+
+/* ---------- Section E: calculator ---------- */
+function updateCalculator(){
+  const X = parseFloat(document.getElementById('kwhInput').value)||0;
+  const tier = tierOf(X);
+  const consumption = actualCostNoFee(X);
+  const total = consumption + tier.fee;
+  document.getElementById('calcTier').textContent = 'الشريحة '+tier.n;
+  document.getElementById('calcConsumption').textContent = fmt(consumption)+' ج';
+  document.getElementById('calcFee').textContent = tier.fee+' ج';
+  document.getElementById('calcTotal').textContent = fmt(total)+' ج';
+}
+
+buildTierTable();
+buildShock();
+buildTrackBg();
+updateSlider();
+updateCalculator();
+
+document.getElementById('kwhRange').addEventListener('input', updateSlider);
+document.getElementById('kwhInput').addEventListener('input', updateCalculator);
+</script>
+</body>
+</html>
