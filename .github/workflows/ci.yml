@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tariff engine tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run tests
+        run: npm test
+
+  contract:
+    name: Tariff contract stays documented
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The tariff registry is a frozen contract (see CONTRIBUTING.md).
+      # If the TIERS table moves, docs/TARIFF-MODEL.md must move with it
+      # in the same change - otherwise the documented contract and the
+      # implemented contract drift apart silently.
+      - name: Fail if TIERS changed without TARIFF-MODEL.md
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin "$BASE_REF"
+          BASE="origin/$BASE_REF"
+
+          if git diff --quiet "$BASE"...HEAD -- index.html; then
+            echo "index.html unchanged - nothing to check."
+            exit 0
+          fi
+
+          if git diff "$BASE"...HEAD -- index.html \
+              | grep -qE '^[+-][[:space:]]*\{n:[0-9]'; then
+            echo "The TIERS registry was modified."
+            if git diff --quiet "$BASE"...HEAD -- docs/TARIFF-MODEL.md; then
+              echo "::error file=index.html::TIERS changed but docs/TARIFF-MODEL.md did not."
+              echo ""
+              echo "The tariff registry is a frozen contract. Update, in this same change:"
+              echo "  - the tier table in docs/TARIFF-MODEL.md"
+              echo "  - its provenance table"
+              echo "  - the tariff schedule version (YYYY-MM)"
+              echo "  - EXPECTED in tests/tariff.test.mjs"
+              echo "  - a CHANGELOG entry under a MINOR version"
+              echo ""
+              echo "See CONTRIBUTING.md."
+              exit 1
+            fi
+            echo "docs/TARIFF-MODEL.md updated alongside it. OK."
+          else
+            echo "index.html changed, but not the TIERS registry. OK."
+          fi

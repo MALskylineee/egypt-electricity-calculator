@@ -1,0 +1,120 @@
+<div align="center">
+
+# ⚡ حاسبة شرائح الكهرباء المصرية
+
+**Egypt Electricity Tier Calculator**
+
+Understand your bill — and see for yourself why one extra kilowatt-hour
+can add hundreds of pounds to it.
+
+[![CI](https://github.com/MALskylineee/egypt-electricity-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/MALskylineee/egypt-electricity-calculator/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/MALskylineee/egypt-electricity-calculator)](https://github.com/MALskylineee/egypt-electricity-calculator/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Tariff](https://img.shields.io/badge/tariff-2026--08-orange)](docs/TARIFF-MODEL.md)
+
+**[▶ Open the calculator](https://malskylineee.github.io/egypt-electricity-calculator/)**
+
+</div>
+
+---
+
+## ما هذا؟ · What this is
+
+Most Egyptian electricity calculators assume the tariff is a plain progressive
+schedule — each tier's price applied only to the kWh inside it. **It isn't.**
+
+Three tiers behave differently: crossing into tier 3, 6 or 7 **discards the
+whole calculation and re-prices every kilowatt-hour you used that month** at
+the new tier's rate. That is why bills jump the way they do:
+
+| You go from | to | Your bill rises by | The extra kWh is worth |
+|---|---|---|---|
+| 100 kWh | 101 kWh | **+33.56 EGP** | 1.06 EGP |
+| 650 kWh | 651 kWh | **+412.85 EGP** | 2.35 EGP |
+| 1000 kWh | 1001 kWh | **+557.89 EGP** | 2.89 EGP |
+
+Crossing into tier 6 costs **176 times** what the kilowatt-hour that triggered
+it is actually worth. This tool exists to make that visible before it lands on
+your bill.
+
+## What's in it
+
+- **Mechanism explainer** — the three ways a tier can be billed, and which tiers use which
+- **Full tier table** — ranges, prices, service fees, mechanism, rendered from one registry
+- **Shock panel** — the three boundary jumps, computed live rather than hard-coded
+- **Interactive slider** — drag through 0–1300 kWh; the tier, bill and effective average price update instantly, and a warning appears when you are within 15 kWh of a reset boundary
+- **Calculator** — enter your real consumption for a full breakdown
+
+Arabic-first, RTL, mobile-friendly, works offline.
+
+## Using it
+
+Open the [live page](https://malskylineee.github.io/egypt-electricity-calculator/),
+or clone and open `index.html` in any browser. There is nothing to install and
+no build step — one file, no dependencies, no network calls.
+
+```bash
+git clone https://github.com/MALskylineee/egypt-electricity-calculator.git
+cd egypt-electricity-calculator
+start index.html      # Windows   (macOS: open · Linux: xdg-open)
+```
+
+## ⚠️ Before you trust a number
+
+- **Indicative, not a bill.** Figures come from the published tariff schedule.
+  Your distribution company's invoice is authoritative.
+- **Tariff schedule `2026-08`.** Residential/household only.
+- **Not modelled:** VAT and levies, arrears, instalments, meter rental,
+  prepaid (كودي) meter behaviour, non-residential tariffs.
+- **Known defect:** typing a **decimal** consumption (e.g. `50.5`) currently
+  reports a wildly inflated bill. Enter whole numbers only until
+  [DEF-001](docs/OPEN-QUESTIONS.md) is fixed.
+- Two tariff prices are still being confirmed against the regulator —
+  see [OQ-002 and OQ-003](docs/OPEN-QUESTIONS.md).
+
+## Documentation
+
+| Document | What it answers |
+|---|---|
+| [TARIFF-MODEL.md](docs/TARIFF-MODEL.md) | **Start here.** The canonical contract: the three mechanisms, the frozen tier registry, the algorithm, worked values, and where each number came from. |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the file is laid out, the pure/DOM split, why the RTL slider maths looks backwards. |
+| [TESTING.md](docs/TESTING.md) | How the suite reaches code that lives inside an HTML file. |
+| [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | Known defects with severity and evidence; unresolved tariff questions and who owns them. |
+| [ADRs](docs/adr/) | Why single-file, why publish with defects intact, why tests extract from HTML, how versioning works. |
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each release. |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | The rules that keep the tariff contract honest. |
+
+## Development
+
+```bash
+npm test
+```
+
+43 tests, no dependencies, Node 20+. They run against the real `index.html` —
+there is no second copy of the tariff logic to drift out of sync. Change a
+price without updating the contract and the suite fails on purpose.
+
+The suite includes **invariant** tests that hold for any valid tariff: the bill
+never decreases as consumption rises, entering a reset tier must actually cause
+a jump, and the slider's segments must sum to exactly 100%.
+
+## Versioning
+
+Two numbers, because two things change independently:
+
+- **Software version** — SemVer, tagged `vX.Y.Z`
+- **Tariff schedule version** — `YYYY-MM`, at the top of [TARIFF-MODEL.md](docs/TARIFF-MODEL.md)
+
+A price change is always a MINOR bump, never a PATCH — displayed numbers
+changed, and that belongs in the changelog. Details in
+[ADR-0004](docs/adr/0004-versioning-and-release-policy.md).
+
+## Sources
+
+- [EgyptERA](https://egyptera.org/en/TarrifAug2024.aspx) — the regulator's published tariff
+- [Youm7](https://www.youm7.com/story/2026/8/1/7499145) — tier prices after the August 2026 increase
+- [Ahram Business](https://business.ahram.org.eg/News/78077.aspx) — official 2026 tier prices
+
+## License
+
+[MIT](LICENSE) © 2026 Mohamed Abdallah
