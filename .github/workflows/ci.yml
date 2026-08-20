@@ -8,15 +8,22 @@ on:
 
 jobs:
   test:
-    name: Tariff engine tests
+    name: Tariff engine tests (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Lowest supported version and current LTS. The test script must stay
+        # portable across both - `node --test` with an explicit glob argument
+        # is NOT supported on Node 20, which is how this was first caught.
+        node: ['20', '22']
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node }}
 
       - name: Run tests
         run: npm test
