@@ -22,6 +22,26 @@ decision first, recorded in [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
 
 ---
 
+## [1.0.1] — 2026-08-20
+
+Tooling only. **No change to any displayed figure**, to `index.html`, or to
+the tariff schedule (still `2026-08`).
+
+### Fixed
+
+- `npm test` passed a glob to `node --test`, which Node 20 does not support —
+  it resolved the pattern as a literal path and exited 1. CI failed on the
+  v1.0.0 commit for this reason while the suite passed locally on Node 24.
+  Switched to bare `node --test`, which scans using default patterns on every
+  supported version.
+
+### Added
+
+- CI now runs the suite on **Node 20 and 22**, so a version-specific
+  regression fails in CI rather than only on a contributor's machine.
+
+---
+
 ## [1.0.0] — 2026-08-20
 
 First public release. **Tariff schedule `2026-08`.**
@@ -77,5 +97,6 @@ See **[Unreleased]** above and
 **entering a decimal consumption value gives a badly inflated bill.** Use whole
 numbers.
 
-[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.0.1
 [1.0.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.0.0
