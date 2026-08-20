@@ -319,29 +319,50 @@ const MECH_TEXT = {
   flat: {pill:'flat',  short:'سعر ثابت مطلق'}
 };
 const SLIDER_MAX = 1300;
+/* The kWh values at which the whole bill gets re-priced from zero. Derived
+   from TIERS rather than written out, so a future tariff change cannot leave
+   the in-app warning pointing at the wrong boundary. */
+const RESET_BOUNDARIES = TIERS.filter(t => t.mode!=='cum').map(t => t.lo);
 
 function fmt(n){ return n.toLocaleString('ar-EG',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function tierOf(X){ return TIERS.find(t => X>=t.lo && X<=t.hi) || TIERS[TIERS.length-1]; }
+
+/* Household consumption is a whole number of kWh - that is how the meter is
+   read and how the bill is issued. Normalise once, here, so nothing
+   downstream ever sees a fraction, a negative, or a non-number. Without
+   this, a value between two tier ranges matched no tier at all and fell
+   through to the most expensive one. */
+function normalizeKwh(X){
+  const n = Number(X);
+  if(!isFinite(n) || n <= 0) return 0;
+  return Math.round(n);
+}
+
+function tierOf(X){
+  const v = normalizeKwh(X);
+  return TIERS.find(t => v>=t.lo && v<=t.hi) || TIERS[TIERS.length-1];
+}
 
 function actualCostNoFee(X){
-  const tier = tierOf(X);
+  const v = normalizeKwh(X);
+  const tier = tierOf(v);
   if(tier.mode==='cum'){
     const idx = TIERS.indexOf(tier);
     let base=0, prevHi=0;
     for(let i=0;i<idx;i++){
       const tt=TIERS[i];
-      if(tt.mode==='reset'){ base = tt.hi*tt.price; }
-      else if(tt.mode==='cum'){ base += (tt.hi-prevHi)*tt.price; }
+      /* any non-cumulative tier below this one re-baselines the total */
+      if(tt.mode!=='cum'){ base = tt.hi*tt.price; }
+      else { base += (tt.hi-prevHi)*tt.price; }
       prevHi = tt.hi;
     }
-    return base + (X-prevHi)*tier.price;
+    return base + (v-prevHi)*tier.price;
   } else {
-    return X*tier.price;
+    return v*tier.price;
   }
 }
 function billOf(X){
-  const tier = tierOf(X);
-  return actualCostNoFee(X) + tier.fee;
+  const v = normalizeKwh(X);
+  return actualCostNoFee(v) + tierOf(v).fee;
 }
 
 /* ---------- Section B: tier table ---------- */
@@ -405,8 +426,7 @@ function updateSlider(){
   document.getElementById('thumb').style.left = (100-pct)+'%';
 
   /* warn strip: how close to next reset/flat boundary */
-  const nextResetBoundaries = [101, 651, 1001];
-  const upcoming = nextResetBoundaries.find(b => X < b && (b-X)<=15);
+  const upcoming = RESET_BOUNDARIES.find(b => X < b && (b-X)<=15);
   const warn = document.getElementById('warnStrip');
   if(upcoming){
     const jump = billOf(upcoming) - billOf(upcoming-1);

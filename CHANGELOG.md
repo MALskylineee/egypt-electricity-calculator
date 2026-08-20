@@ -11,14 +11,64 @@ plus a separate `YYYY-MM` tariff schedule version — see
 
 ## [Unreleased]
 
-Nothing yet. Next up is resolving the defects below — each needs a product
-decision first, recorded in [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
+Remaining items are cosmetic or scope questions, not calculation defects —
+see [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
 
-- **DEF-001** (high) — fractional kWh input falls through to tier 7
-- **DEF-002** (medium) — negative kWh produces a positive tier-7 bill
-- **DEF-003** (low) — reset boundaries duplicated between `TIERS` and `updateSlider()`
 - **DEF-004** (low) — Arabic-Indic and Latin digits mixed on the same page
 - **DEF-005** (low) — slider capped at 1300 kWh, cannot reach real tier-7 consumption
+
+---
+
+## [1.1.0] — 2026-08-20
+
+Fixes every known **calculation** defect. Tariff schedule unchanged (`2026-08`).
+
+MINOR rather than PATCH because displayed figures change for the inputs that
+were previously wrong — see [ADR-0004](docs/adr/0004-versioning-and-release-policy.md).
+
+### Fixed
+
+- **DEF-001 (high) — fractional consumption fell through to tier 7.** Tier
+  ranges are integer ranges, so any decimal matched no tier and hit the
+  last-tier fallback: the most expensive flat rate. Typing `50.5` reported
+  **الشريحة 7 and 185.95 EGP instead of about 36.87** — five times too high.
+  Reproduced in the browser, not only in tests.
+- **DEF-002 (medium) — negative consumption produced a positive tier-7 bill.**
+  `-5` reported 25.55 EGP. Now clamps to 0.
+- **DEF-003 (low) — reset boundaries were duplicated.** `updateSlider()`
+  hard-coded `[101, 651, 1001]` alongside the same values in `TIERS`. A future
+  tariff change could have left the in-app warning pointing at a stale
+  boundary. Now derived as `RESET_BOUNDARIES`.
+- Junk input (`abc`, empty, `NaN`, `Infinity`, `null`) now reads as 0 kWh and
+  shows the tier 1 service fee, instead of a nonsense figure.
+- The re-baselining loop in `actualCostNoFee()` tested `mode === 'reset'` while
+  the branch above it treated `reset` and `flat` alike. Behaviour-neutral with
+  today's registry, since the only `flat` tier is last — corrected to
+  `mode !== 'cum'` so a future registry cannot expose the inconsistency.
+
+### Added
+
+- `normalizeKwh()` — a single input boundary that coerces, clamps and rounds
+  consumption to a whole kWh. Household consumption *is* a whole number of
+  kWh: it is how the meter is read, how the bill is issued, and how the tariff
+  table is written. Reasoning and the rejected alternative in
+  [ADR-0005](docs/adr/0005-normalise-consumption-to-whole-kwh.md).
+- 8 tests covering the normalisation contract: rounding direction, boundary
+  carry, clamping, junk input, numeric strings, and non-negative cost.
+- An invariant test asserting every boundary the app warns about produces a
+  real jump.
+
+### Verified
+
+| Check | Result |
+|---|---|
+| Whole-kWh bills vs v1.0.1 | ✅ **All 13 reference values identical** — no regression |
+| Previously broken inputs | ✅ `50.5`→tier 2 · `100.5`→tier 3 · `-5`→tier 1 |
+| Monotonicity across fractional input (0–1300, step 0.25) | ✅ Bill never decreases |
+| Browser behaviour | ✅ Confirmed on the live page, no console errors |
+| Test suite | ✅ 51 tests, 51 pass, 0 todo |
+
+Both regression tests were run **red before the fix** and green after.
 
 ---
 
@@ -97,6 +147,7 @@ See **[Unreleased]** above and
 **entering a decimal consumption value gives a badly inflated bill.** Use whole
 numbers.
 
-[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.1.0
 [1.0.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.0.1
 [1.0.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.0.0

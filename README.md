@@ -66,9 +66,9 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 - **Tariff schedule `2026-08`.** Residential/household only.
 - **Not modelled:** VAT and levies, arrears, instalments, meter rental,
   prepaid (كودي) meter behaviour, non-residential tariffs.
-- **Known defect:** typing a **decimal** consumption (e.g. `50.5`) currently
-  reports a wildly inflated bill. Enter whole numbers only until
-  [DEF-001](docs/OPEN-QUESTIONS.md) is fixed.
+- **Consumption is rounded to a whole kWh** — `450.7` is treated as `451`.
+  That is how meters are read and bills are issued
+  ([ADR-0005](docs/adr/0005-normalise-consumption-to-whole-kwh.md)).
 - Two tariff prices are still being confirmed against the regulator —
   see [OQ-002 and OQ-003](docs/OPEN-QUESTIONS.md).
 
@@ -90,13 +90,16 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 npm test
 ```
 
-43 tests, no dependencies, Node 20+. They run against the real `index.html` —
+51 tests, no dependencies, Node 20+. They run against the real `index.html` —
 there is no second copy of the tariff logic to drift out of sync. Change a
 price without updating the contract and the suite fails on purpose.
 
 The suite includes **invariant** tests that hold for any valid tariff: the bill
 never decreases as consumption rises, entering a reset tier must actually cause
 a jump, and the slider's segments must sum to exactly 100%.
+
+Every bug gets a regression test that is seen **red before the fix** — a test
+that was never seen failing has not been shown to test anything.
 
 ## Versioning
 

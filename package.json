@@ -1,6 +1,6 @@
 {
   "name": "egypt-electricity-calculator",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Interactive Egyptian household electricity tariff calculator that shows why crossing a tier boundary can jump the bill far more than the extra kWh is worth.",
   "type": "module",
   "private": true,

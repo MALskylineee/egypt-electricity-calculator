@@ -60,7 +60,27 @@ Prices in EGP per kWh. The fee is a fixed monthly customer-service charge
 
 ## 3. The algorithm
 
-Given consumption `X` kWh, let `T` be the tier whose range contains `X`.
+### 3.0 Input normalisation
+
+Household consumption is **a whole number of kWh** — that is how the meter is
+read, how the bill is issued, and how the tier ranges above are written. Input
+is normalised before any pricing happens:
+
+```
+normalizeKwh(X):
+    n = Number(X)
+    if n is not finite, or n <= 0:  return 0
+    return round(n)
+```
+
+So `450.7 → 451`, `-5 → 0`, `"abc" → 0`. Rounding can carry a consumer across a
+boundary (`100.5 → 101`, which triggers the tier 3 reset); that is correct,
+because the bill would be issued for 101 kWh. See
+[ADR-0005](adr/0005-normalise-consumption-to-whole-kwh.md).
+
+### 3.1 Pricing
+
+Given normalised consumption `X` kWh, let `T` be the tier whose range contains `X`.
 
 ```
 if T.mode is 'reset' or 'flat':
@@ -68,8 +88,8 @@ if T.mode is 'reset' or 'flat':
 
 if T.mode is 'cum':
     walk every tier BELOW T in order, maintaining (base, prevHi):
-        if that tier is 'reset'/'flat':  base  = tier.hi * tier.price   # re-baseline
-        if that tier is 'cum':           base += (tier.hi - prevHi) * tier.price
+        if that tier is NOT 'cum':  base  = tier.hi * tier.price   # re-baseline
+        else:                       base += (tier.hi - prevHi) * tier.price
         prevHi = tier.hi
     consumptionCost = base + (X - prevHi) * T.price
 
@@ -127,6 +147,13 @@ Crossing into tier 6 costs **176× more** than the kWh that triggered it.
 | Tier 3 price 1.06 | ⚠️ Confirm | EgyptERA base 0.95 × 1.12 = 1.064 ✅, but one outlet rounds it to "1 pound". See OQ-003. |
 | Tier 4 price 1.74 | ⚠️ Confirm | EgyptERA base 1.55 × 1.12 = 1.736 → rounds to 1.74; one outlet states 1.73. See OQ-003. |
 | `reset` on tiers 3, 6, 7 | ✅ Corroborated | Aug-2026 reporting lists these tiers with ranges beginning at zero. |
+
+### Derived constants
+
+`RESET_BOUNDARIES` — the kWh values at which the whole bill is re-priced from
+zero — is **derived from this registry** (`[101, 651, 1001]` today), never
+written out by hand. The in-app proximity warning reads it, so a tariff change
+cannot leave the warning pointing at a stale boundary.
 
 Unresolved items are tracked in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
 

@@ -2,7 +2,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadEngine, money } from './engine.mjs';
 
-const { TIERS, tierOf, actualCostNoFee, billOf, SLIDER_MAX } = loadEngine();
+const { TIERS, tierOf, actualCostNoFee, billOf, SLIDER_MAX, RESET_BOUNDARIES } =
+  loadEngine();
 
 /* =========================================================================
    1. TARIFF REGISTRY - the frozen contract.
@@ -142,33 +143,93 @@ describe('invariants', () => {
     assert.equal(money(total), 100);
   });
 
-  test('warn-strip boundaries in updateSlider() match the reset/flat tiers', () => {
-    // updateSlider() hard-codes [101, 651, 1001]. If TIERS changes and that
-    // literal does not, the in-app warning silently points at the wrong kWh.
-    // Spread into a host-realm array: TIERS comes from a vm context, so its
-    // derived arrays carry a different Array.prototype and would fail
-    // deepStrictEqual on the prototype check alone.
+  test('RESET_BOUNDARIES is derived from TIERS, not written out by hand', () => {
+    // The in-app warning ("you are N kWh from a reset tier") reads these.
+    // They must come from TIERS so a tariff change cannot leave the warning
+    // pointing at the wrong kWh.
+    // Spread into a host-realm array: values cross out of a vm context and
+    // carry a different Array.prototype, which deepStrictEqual rejects.
     const derived = [...TIERS.filter((t) => t.mode !== 'cum').map((t) => t.lo)];
-    assert.deepEqual(
-      derived, [101, 651, 1001],
-      'TIERS changed but the hard-coded nextResetBoundaries in index.html did not'
-    );
+    assert.deepEqual([...RESET_BOUNDARIES], derived,
+      'RESET_BOUNDARIES has drifted from the TIERS registry');
+    assert.deepEqual([...RESET_BOUNDARIES], [101, 651, 1001]);
+  });
+
+  test('every reset boundary warning quotes a real jump', () => {
+    for (const b of RESET_BOUNDARIES) {
+      const jump = billOf(b) - billOf(b - 1);
+      assert.ok(jump > 0, `no jump at the boundary the app warns about (${b} kWh)`);
+    }
   });
 });
 
 /* =========================================================================
-   5. KNOWN DEFECTS - see docs/OPEN-QUESTIONS.md.
-   Marked `todo` so they are recorded and visible without breaking CI.
-   Remove the todo flag in the same commit that lands the fix.
+   5. INPUT NORMALISATION.
+   Household consumption is a whole number of kWh - that is how a meter is
+   read and how a bill is issued. Anything else is normalised at the
+   boundary before it reaches the pricing engine. See ADR-0005.
    ========================================================================= */
-describe('known defects (todo until fixed)', () => {
-  test('fractional kWh should not fall through to tier 7', { todo: 'DEF-001' }, () => {
+describe('input normalisation', () => {
+  test('a whole number is left exactly as-is', () => {
+    for (const x of [0, 1, 50, 51, 100, 101, 650, 651, 1000, 1001, 5000]) {
+      assert.equal(tierOf(x).n, tierOf(x).n);
+      assert.equal(money(billOf(x)), money(billOf(Math.round(x))));
+    }
+  });
+
+  test('fractional consumption rounds to the nearest whole kWh', () => {
+    assert.equal(money(billOf(450.4)), money(billOf(450)));
+    assert.equal(money(billOf(450.6)), money(billOf(451)));
+    assert.equal(money(billOf(99.5)),  money(billOf(100)));
+    assert.equal(money(billOf(100.4)), money(billOf(100)));
+  });
+
+  test('rounding can carry a consumer across a tier boundary', () => {
+    // 100.5 rounds to 101, which is the tier 3 reset boundary. This is
+    // correct: the bill is issued for 101 kWh, so tier 3 is what applies.
+    assert.equal(tierOf(100.5).n, 3);
+    assert.equal(money(billOf(100.5)), money(billOf(101)));
+    assert.equal(tierOf(100.4).n, 2);
+    assert.equal(money(billOf(100.4)), money(billOf(100)));
+  });
+
+  test('negative consumption is clamped to zero', () => {
+    for (const x of [-1, -5, -0.5, -9999]) {
+      assert.equal(tierOf(x).n, 1, `${x} kWh should clamp into tier 1`);
+      assert.equal(money(billOf(x)), 1.00, `${x} kWh should bill the tier 1 fee only`);
+    }
+  });
+
+  test('non-numeric and non-finite input is treated as zero', () => {
+    for (const x of [NaN, Infinity, -Infinity, undefined, null, '', 'abc']) {
+      assert.equal(money(billOf(x)), 1.00, `${String(x)} should bill as 0 kWh`);
+      assert.equal(tierOf(x).n, 1);
+    }
+  });
+
+  test('a numeric string is accepted', () => {
+    assert.equal(money(billOf('450')), money(billOf(450)));
+    assert.equal(tierOf('651').n, 6);
+  });
+
+  test('normalisation never produces a negative cost', () => {
+    for (const x of [-1000, -1, -0.1, 0, 0.1, 0.5]) {
+      assert.ok(actualCostNoFee(x) >= 0, `negative cost at ${x}`);
+    }
+  });
+});
+
+/* =========================================================================
+   6. REGRESSION TESTS for fixed defects. See docs/OPEN-QUESTIONS.md history.
+   ========================================================================= */
+describe('fixed defects (regression)', () => {
+  test('fractional kWh should not fall through to tier 7', () => {
     assert.equal(tierOf(50.5).n, 2, '50.5 kWh currently resolves to tier 7');
     assert.equal(tierOf(100.5).n, 3);
     assert.equal(tierOf(650.5).n, 6);
   });
 
-  test('negative kWh should not produce a tier-7 bill', { todo: 'DEF-002' }, () => {
+  test('negative kWh should not produce a tier-7 bill', () => {
     assert.equal(tierOf(-5).n, 1, '-5 kWh currently resolves to tier 7');
     assert.ok(billOf(-5) <= 1, `-5 kWh currently bills ${billOf(-5).toFixed(2)} EGP`);
   });

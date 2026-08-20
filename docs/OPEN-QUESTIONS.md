@@ -10,67 +10,15 @@ Last reviewed: **2026-08-20**
 
 ## A. Known defects
 
-### DEF-001 — Fractional kWh input falls through to tier 7 · **severity: high**
-
-`tierOf(X)` matches with `X >= t.lo && X <= t.hi`. Tier ranges are integer
-ranges (`…50`, then `51…`), so **any non-integer value lands between two
-tiers**, matches nothing, and hits the `|| TIERS[TIERS.length-1]` fallback —
-tier 7, the most expensive flat rate.
-
-The calculator input parses with `parseFloat`, and browsers accept typed
-decimals in a `number` field regardless of `step="1"`. So this is reachable by
-a normal user simply typing `50.5`.
-
-Observed:
-
-| Input | Reported tier | Bill shown | Should be about |
-|---|---|---|---|
-| 50.5 kWh | 7 | 185.94 EGP | ~36.87 EGP (**5.0× over**) |
-| 100.5 kWh | 7 | 330.44 EGP | ~113.06 EGP (**2.9× over**) |
-| 650.5 kWh | 7 | 1919.95 EGP | ~1554.85 EGP (**1.2× over**) |
-
-Regression test: `tests/tariff.test.mjs` → *"fractional kWh should not fall
-through to tier 7"* (currently `todo`).
-
-**Decision needed:** round the input, or widen tier matching to
-`X < nextTier.lo`? Rounding is likelier to match how a meter is actually read.
-
----
-
-### DEF-002 — Negative kWh produces a positive tier-7 bill · **severity: medium**
-
-Same fallback path. `-5` matches no tier → tier 7 → `-5 × 2.89 + 40 = 25.55
-EGP`. The `min="0"` attribute does not prevent typing a negative value, and
-nothing clamps it afterwards.
-
-Regression test: *"negative kWh should not produce a tier-7 bill"* (`todo`).
-
-**Decision needed:** clamp to 0, or show a validation message?
-
----
-
-### DEF-003 — Reset boundaries are duplicated · **severity: low (drift risk)**
-
-`updateSlider()` hard-codes `const nextResetBoundaries = [101, 651, 1001];`.
-That is derivable from `TIERS` as
-`TIERS.filter(t => t.mode !== 'cum').map(t => t.lo)`.
-
-They agree **today**. If a future tariff moves a boundary and only `TIERS` is
-updated, the in-app warning will silently point at the wrong kWh — the worst
-kind of failure for a tool whose purpose is warning about boundaries.
-
-Guarded by an invariant test that fails if `TIERS` changes without this
-literal being revisited. The duplication itself is not yet removed (see
-ADR-0002 on minimum-change discipline).
-
----
-
 ### DEF-004 — Digit rendering is inconsistent · **severity: low (cosmetic)**
 
 `fmt()` uses `toLocaleString('ar-EG')`, which renders Arabic-Indic digits
 (`١٬٢٣٤٫٥٠`). But the tier table uses `price.toFixed(2)` and the calculator's
 fee box uses raw `tier.fee` — both Latin digits. The same page therefore shows
-`٢٬٣٧٥٫٠٠` and `2.35` side by side.
+`٢٬٣٧٥٫٠٠` and `2.35` side by side, and the calculator card shows a total in
+Arabic-Indic next to a fee in Latin.
+
+Cosmetic only — no figure is wrong.
 
 **Decision needed:** pick one numeral system for the whole UI.
 
@@ -140,10 +88,34 @@ statement either way.
 
 ---
 
+### OQ-006 — Should the normalised consumption be shown back to the user? · blocks: nothing
+
+Since v1.1.0, input is rounded to a whole kWh
+([ADR-0005](adr/0005-normalise-consumption-to-whole-kwh.md)). The rounding is
+silent: typing `100.5` produces a tier 3 bill with no indication that the
+value was treated as 101 — which matters, because that rounding is what
+crossed the reset boundary.
+
+**Owner:** Mohamed. **Proposal:** echo the normalised figure in the results
+card when it differs from what was typed.
+
+---
+
+## C. Resolved
+
+| ID | Defect | Resolved in |
+|---|---|---|
+| DEF-001 | Fractional kWh fell through to tier 7, overstating the bill by up to 5× | v1.1.0 — [ADR-0005](adr/0005-normalise-consumption-to-whole-kwh.md) |
+| DEF-002 | Negative kWh produced a positive tier-7 bill | v1.1.0 — same normalisation |
+| DEF-003 | Reset boundaries duplicated between `TIERS` and `updateSlider()` | v1.1.0 — now derived as `RESET_BOUNDARIES` |
+
+---
+
 ## How to close an item
 
 1. Record the decision and its reasoning in an ADR under `docs/adr/`.
 2. Update [TARIFF-MODEL.md](TARIFF-MODEL.md) if the contract changed.
-3. For a defect: remove the `todo` flag from its regression test in the same
-   commit as the fix, and confirm the test goes green.
-4. Delete the entry here and add a line to [CHANGELOG.md](../CHANGELOG.md).
+3. For a defect: write the regression test first and watch it fail, then fix,
+   then confirm it goes green.
+4. Move the entry to **Resolved** above and add a line to
+   [CHANGELOG.md](../CHANGELOG.md).

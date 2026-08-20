@@ -33,7 +33,8 @@ export function loadEngine() {
   const expose =
     ';globalThis.TIERS=TIERS;globalThis.tierOf=tierOf;' +
     'globalThis.actualCostNoFee=actualCostNoFee;globalThis.billOf=billOf;' +
-    'globalThis.SLIDER_MAX=SLIDER_MAX;globalThis.MECH_TEXT=MECH_TEXT;';
+    'globalThis.SLIDER_MAX=SLIDER_MAX;globalThis.MECH_TEXT=MECH_TEXT;' +
+    'globalThis.RESET_BOUNDARIES=RESET_BOUNDARIES;globalThis.normalizeKwh=normalizeKwh;';
 
   const ctx = vm.createContext({});
   vm.runInContext(logic + expose, ctx);

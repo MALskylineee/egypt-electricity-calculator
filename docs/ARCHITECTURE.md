@@ -12,8 +12,9 @@ index.html
 ├─ <style>   design tokens in :root, then section-scoped rules
 ├─ <body>    5 cards, all content-empty; every value is rendered by JS
 └─ <script>
-   ├─ DATA    TIERS, MECH_TEXT, SLIDER_MAX
-   ├─ ENGINE  fmt, tierOf, actualCostNoFee, billOf     ← pure, no DOM
+   ├─ DATA    TIERS, MECH_TEXT, SLIDER_MAX, RESET_BOUNDARIES
+   ├─ ENGINE  fmt, normalizeKwh, tierOf,
+   │          actualCostNoFee, billOf                  ← pure, no DOM
    └─ VIEWS   buildTierTable, buildShock, buildTrackBg,
               updateSlider, updateCalculator            ← DOM only
 ```
@@ -59,9 +60,14 @@ Three functions, in dependency order:
 
 | Function | Purpose |
 |---|---|
-| `tierOf(X)` | Find the tier containing `X`. Falls back to the last tier when nothing matches — the source of [DEF-001/002](OPEN-QUESTIONS.md). |
-| `actualCostNoFee(X)` | Energy cost. Branches on the tier's mechanism; the `cum` branch walks all lower tiers, re-baselining whenever it passes a `reset` tier. |
+| `normalizeKwh(X)` | Coerce to a number, clamp non-finite or `≤ 0` to `0`, round to a whole kWh. **Every other engine function calls this first**, so no fraction, negative or non-number reaches the arithmetic. See [ADR-0005](adr/0005-normalise-consumption-to-whole-kwh.md). |
+| `tierOf(X)` | Find the tier containing the normalised `X`. |
+| `actualCostNoFee(X)` | Energy cost. Branches on the tier's mechanism; the `cum` branch walks all lower tiers, re-baselining whenever it passes a non-cumulative one. |
 | `billOf(X)` | `actualCostNoFee(X) + tier.fee`. |
+
+Normalisation happens **at the boundary, once**. It is deliberately not
+scattered through the view functions — `updateCalculator()` can hand
+`billOf()` whatever the user typed and rely on it being made safe.
 
 Full algorithm and worked values: [TARIFF-MODEL.md](TARIFF-MODEL.md).
 
@@ -71,6 +77,11 @@ Full algorithm and worked values: [TARIFF-MODEL.md](TARIFF-MODEL.md).
 `.track-bg` lays tier 1 out at the **right** edge. `updateSlider()` therefore
 positions the thumb with `left: (100 - pct)%`, not `left: pct%`. This is
 correct — do not "fix" it.
+
+**Reset boundaries are derived, not hard-coded.** `RESET_BOUNDARIES` comes from
+`TIERS.filter(t => t.mode !== 'cum').map(t => t.lo)`. The proximity warning in
+`updateSlider()` reads it, so a future tariff change cannot leave the warning
+pointing at a boundary that no longer exists.
 
 **Track segments are computed, not hard-coded.** `buildTrackBg()` derives each
 segment's width from `TIERS`, clamping tier 7's infinite ceiling to
