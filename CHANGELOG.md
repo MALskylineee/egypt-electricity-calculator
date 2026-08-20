@@ -18,6 +18,27 @@ questions — see [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
 
 ---
 
+## [1.2.1] — 2026-08-20
+
+Wording only. No calculation, figure or layout changed.
+
+### Changed
+
+- The tier-3 section heading read `لحظة الصدمة` ("the moment of shock") —
+  sensational framing for what is a factual comparison. Replaced with a plain
+  descriptive question: `إيه اللي بيحصل أول ما تدخل الشريحة الثالثة؟`, matching
+  the neutral voice of the other section headings.
+- Its intro line was reworded from `مثال حقيقي … شوف إيه اللي بيحصل للفاتورة`
+  to `مثال … ده الفرق في الفاتورة`, so it no longer repeats the heading.
+- `README.md` and `docs/TARIFF-MODEL.md` reworded to match ("tier-entry
+  comparison" / "tier-entry jumps" rather than "shock").
+
+The internal CSS classes, element ids and `buildShock()` keep their existing
+names. Renaming them would be a large diff with no user-visible effect, and
+this project does not rename things opportunistically — see CONTRIBUTING.md.
+
+---
+
 ## [1.2.0] — 2026-08-20
 
 Presentation and honesty. **No calculation changed**; every figure is
@@ -194,7 +215,8 @@ See **[Unreleased]** above and
 **entering a decimal consumption value gives a badly inflated bill.** Use whole
 numbers.
 
-[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.1
 [1.2.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.0
 [1.1.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.1.0
 [1.0.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.0.1

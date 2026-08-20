@@ -60,7 +60,7 @@ your bill.
 
 - **Mechanism explainer** — the three ways a tier can be billed, and which tiers use which
 - **Full tier table** — ranges, prices, service fees, mechanism, rendered from one registry
-- **Shock panel** — the three boundary jumps, computed live rather than hard-coded
+- **Tier-entry comparison** — the three boundary jumps, computed live rather than hard-coded
 - **Interactive slider** — drag through 0–1300 kWh; the tier, bill and effective average price update instantly, and a warning appears when you are within 15 kWh of a reset boundary
 - **Calculator** — enter your real consumption for a full breakdown
 

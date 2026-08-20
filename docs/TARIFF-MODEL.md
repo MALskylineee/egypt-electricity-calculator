@@ -121,7 +121,7 @@ These are locked in by `tests/tariff.test.mjs`.
 | 1000 | 2375.00 | 1000×2.35 = 2350.00 (+25) |
 | 1001 | 2932.89 | **flat** → 1001×2.89 = 2892.89 (+40) |
 
-### The shock, quantified
+### Tier-entry jumps, quantified
 
 | Boundary crossed | Bill jump | Energy actually bought |
 |---|---|---|
