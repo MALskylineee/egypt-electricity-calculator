@@ -133,6 +133,25 @@ describe('invariants', () => {
     }
   });
 
+  test('exactly ONE service fee is charged - the tier reached, never accumulated', () => {
+    // Confirmed by the owner 2026-08-20: the fee is the one printed in the
+    // table for the tier you land in, applied on entering that tier and taken
+    // from prepaid credit. It is NOT the sum of the fees of every tier passed
+    // through on the way there - that would overcharge by 20 EGP at tier 5.
+    let cumulative = 0;
+    for (const t of TIERS) {
+      cumulative += t.fee;
+      const kwh = t.hi === Infinity ? 1200 : t.hi;
+      const charged = money(billOf(kwh) - actualCostNoFee(kwh));
+      assert.equal(charged, t.fee,
+        `tier ${t.n} charged ${charged} in fees, expected exactly ${t.fee}`);
+      if (t.n > 1) {
+        assert.notEqual(charged, cumulative,
+          `tier ${t.n} is charging accumulated fees (${cumulative}) instead of ${t.fee}`);
+      }
+    }
+  });
+
   test('slider track segments sum to exactly 100%', () => {
     let total = 0;
     for (const t of TIERS) {

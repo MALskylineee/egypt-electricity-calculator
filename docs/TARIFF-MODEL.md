@@ -46,7 +46,13 @@ tool.
 ## 2. The tier registry (frozen)
 
 Prices in EGP per kWh. The fee is a fixed monthly customer-service charge
-(`رسوم خدمة العملاء`) added once, determined by the tier the consumer lands in.
+(`رسوم خدمة العملاء`) added **once**, determined by the tier the consumer lands
+in — **not** accumulated across the tiers passed through on the way there.
+
+On a prepaid card meter the fee is applied **the moment consumption crosses
+into that tier**, and comes straight out of the card's remaining credit
+(confirmed by the owner, 2026-08-20). EgyptERA publishes these as
+"EGP/month", consistent with one fee per meter per month.
 
 | # | Range (kWh) | Price (EGP/kWh) | Service fee (EGP) | Mechanism |
 |---|---|---|---|---|
@@ -151,10 +157,11 @@ Crossing into tier 6 costs **176× more** than the kWh that triggered it.
 | Tier 2 price 0.87 | ✅ Consistent | EgyptERA base 0.78 × 1.12 = 0.874 |
 | Tier 5 price 2.18 | ✅ Consistent | EgyptERA base 1.95 × 1.12 = 2.184 |
 | Tier 6 price 2.35 | ✅ Consistent | EgyptERA base 2.10 × 1.12 = 2.352 |
-| Tier 7 price 2.89 | ⚠️ Confirm | Matches Aug-2026 reporting, but EgyptERA base 2.23 × 1.12 = 2.50. Other outlets cite 2.58 and 2.74. See OQ-002. |
+| Tier 7 price 2.89 | ✅ Confirmed | Confirmed correct by the owner, 2026-08-20. Note for anyone re-deriving: this tier did **not** follow the flat 12% rise (base 2.23 × 1.12 = 2.50) — the top bracket took a larger increase. Do not "correct" it to 2.50. |
 | Tier 3 price 1.06 | ⚠️ Confirm | EgyptERA base 0.95 × 1.12 = 1.064 ✅, but one outlet rounds it to "1 pound". See OQ-003. |
 | Tier 4 price 1.74 | ⚠️ Confirm | EgyptERA base 1.55 × 1.12 = 1.736 → rounds to 1.74; one outlet states 1.73. See OQ-003. |
 | `reset` on tiers 3, 6, 7 | ✅ Corroborated | Aug-2026 reporting lists these tiers with ranges beginning at zero. |
+| Fee charged once, per tier reached | ✅ Confirmed | Owner, 2026-08-20. Applied on entering the tier, deducted from prepaid credit. |
 
 ### Derived constants
 

@@ -100,8 +100,8 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 - **Consumption is rounded to a whole kWh** — `450.7` is treated as `451`.
   That is how meters are read and bills are issued
   ([ADR-0005](docs/adr/0005-normalise-consumption-to-whole-kwh.md)).
-- Two tariff prices are still being confirmed against the regulator —
-  see [OQ-002 and OQ-003](docs/OPEN-QUESTIONS.md).
+- Tier 3 and tier 4 prices are still being pinned down to the qirsh —
+  see [OQ-003](docs/OPEN-QUESTIONS.md). Sub-1-qirsh, so the effect is small.
 
 ## Documentation
 

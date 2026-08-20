@@ -21,18 +21,6 @@ visual explorer is.
 
 ## B. Open questions
 
-### OQ-002 — Confirm the tier 7 price (2.89) · blocks: numeric accuracy above 1000 kWh
-
-Every other tier is consistent with *EgyptERA base × 1.12*. Tier 7 is not:
-`2.23 × 1.12 = 2.50`, yet the tool uses **2.89**. Aug-2026 reporting does cite
-289 qirsh, and a larger-than-average rise on the top bracket is plausible
-under subsidy reform — but other outlets cite 2.58 and 2.74.
-
-**Owner:** Mohamed (needs an EgyptERA decision document or a real bill above
-1000 kWh). **Until resolved:** figures above 1000 kWh may be overstated.
-
----
-
 ### OQ-003 — Confirm tier 3 and tier 4 to the qirsh · blocks: minor accuracy
 
 Tier 3: tool `1.06`; EgyptERA base × 1.12 = `1.064` ✅; one outlet rounds to
@@ -51,21 +39,6 @@ an unlabelled slider reading raw numbers with no unit or tier context.
 
 **Owner:** Mohamed. **Proposal:** add `aria-label` plus an `aria-valuetext`
 updated in `updateSlider()` to announce tier and bill.
-
----
-
-### OQ-007 — Is the service fee deducted from prepaid credit as modelled? · blocks: accuracy of the fee line
-
-The tool adds one per-tier customer service fee (`الرسوم الإدارية`, 1–40 EGP)
-to a month's consumption. On a postpaid invoice that is a single monthly line.
-On a **prepaid card meter** it is unconfirmed whether the fee is deducted once
-per month, taken at top-up time, or split across top-ups — and whether the
-amount charged follows the tier reached, as modelled here.
-
-Low impact on the total (1–40 EGP against hundreds), but it is the one part of
-the model whose prepaid behaviour has not been checked.
-
-**Owner:** Mohamed — needs a real prepaid meter's deduction history.
 
 ---
 
@@ -97,6 +70,8 @@ card when it differs from what was typed.
 |---|---|---|
 | OQ-001 | Should the page state a tariff effective date? | Yes — v1.3.0 shows `1 أغسطس 2026` under the tier table |
 | OQ-005 | Does the tool model prepaid or postpaid meters? | Prepaid card meters are the primary audience; the schedule is the same for both, so the copy is settlement-neutral. [ADR-0007](adr/0007-prepaid-framing-and-tariff-date.md) |
+| OQ-002 | Is the tier 7 price really 2.89? | **Yes** — confirmed by the owner, 2026-08-20. The top bracket did not follow the flat 12% rise; 2.50 is the wrong derivation. |
+| OQ-007 | Is the service fee deducted from prepaid credit as modelled? | **Yes** — confirmed by the owner, 2026-08-20. One fee, per the tier reached, applied on entering that tier and taken from the card's credit. Matches the implementation. |
 
 ---
 

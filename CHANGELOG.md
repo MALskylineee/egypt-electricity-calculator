@@ -18,6 +18,35 @@ questions — see [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
 
 ---
 
+## [1.3.1] — 2026-08-20
+
+Two tariff facts confirmed by the owner. **No code or figure changed** — the
+implementation already matched both; this records that and locks one of them
+with a test.
+
+### Verified
+
+| ID | Question | Answer |
+|---|---|---|
+| OQ-002 | Is the tier 7 price really 2.89? | **Yes.** The top bracket did not follow the flat 12% rise, so deriving `2.23 × 1.12 = 2.50` is wrong. Recorded in the provenance table so a future session does not "correct" it. |
+| OQ-007 | Is the service fee deducted from prepaid credit as modelled? | **Yes.** One fee, per the tier reached, applied the moment consumption enters that tier, taken from the card's credit. |
+
+### Added
+
+- An invariant test asserting **exactly one** service fee is charged — the
+  tier reached, never the sum of the tiers passed through. The accumulating
+  reading would overcharge by 20 EGP at tier 5, so the distinction is now a
+  build failure rather than a comment.
+- `docs/TARIFF-MODEL.md` records the prepaid fee timing and notes that
+  EgyptERA publishes these as "EGP/month", consistent with one fee per month.
+
+### Changed
+
+- README no longer warns that two tariff prices are unconfirmed — only tier 3
+  and tier 4 remain, and only to the qirsh (OQ-003).
+
+---
+
 ## [1.3.0] — 2026-08-20
 
 Corrects a wrong premise in the copy, and states the tariff date on the page.
@@ -260,7 +289,8 @@ See **[Unreleased]** above and
 **entering a decimal consumption value gives a badly inflated bill.** Use whole
 numbers.
 
-[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.3.1
 [1.3.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.3.0
 [1.2.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.1
 [1.2.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.0
