@@ -18,6 +18,25 @@ can add hundreds of pounds to it.
 
 ---
 
+> ### ⚠️ تنويه مهم: الحاسبة دي غير رسمية
+>
+> ده **مجهود شخصي فردي**، مالوش أي علاقة بوزارة الكهرباء ولا بشركات التوزيع
+> ولا بأي جهة رسمية، ومش معتمد من أي حد. الهدف منه بس إنه يساعدك تفهم إزاي
+> فاتورتك بتتحسب. **الأرقام هنا ممكن يكون فيها أخطاء** أو تكون التعريفة اتغيرت
+> ولسه مااتحدثتش هنا. متاخدش أي قرار بناءً عليها، و**الفاتورة الرسمية من شركة
+> التوزيع بتاعتك هي المرجع الوحيد المعتمد**.
+>
+> ### ⚠️ This is an unofficial tool
+>
+> **A solo personal effort.** Not affiliated with, endorsed by, or connected to
+> the Egyptian Ministry of Electricity, any distribution company, or any
+> official body. It exists only to help people understand how their bill is
+> calculated. **The figures may contain errors** or reflect a tariff that has
+> since changed. Do not make decisions based on them — **your distribution
+> company's official bill is the only authoritative reference.**
+
+---
+
 ## ما هذا؟ · What this is
 
 Most Egyptian electricity calculators assume the tariff is a plain progressive
@@ -61,8 +80,9 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 
 ## ⚠️ Before you trust a number
 
-- **Indicative, not a bill.** Figures come from the published tariff schedule.
-  Your distribution company's invoice is authoritative.
+- **Unofficial and indicative, not a bill.** See the disclaimer above. Figures
+  come from the published tariff schedule; your distribution company's invoice
+  is authoritative.
 - **Tariff schedule `2026-08`.** Residential/household only.
 - **Not modelled:** VAT and levies, arrears, instalments, meter rental,
   prepaid (كودي) meter behaviour, non-residential tariffs.
@@ -80,7 +100,7 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the file is laid out, the pure/DOM split, why the RTL slider maths looks backwards. |
 | [TESTING.md](docs/TESTING.md) | How the suite reaches code that lives inside an HTML file. |
 | [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | Known defects with severity and evidence; unresolved tariff questions and who owns them. |
-| [ADRs](docs/adr/) | Why single-file, why publish with defects intact, why tests extract from HTML, how versioning works. |
+| [ADRs](docs/adr/) | Why single-file, why publish with defects intact, why tests extract from HTML, how versioning works, why consumption is rounded to whole kWh, why Western digits. |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each release. |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | The rules that keep the tariff contract honest. |
 
@@ -90,7 +110,7 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 npm test
 ```
 
-51 tests, no dependencies, Node 20+. They run against the real `index.html` —
+57 tests, no dependencies, Node 20+. They run against the real `index.html` —
 there is no second copy of the tariff logic to drift out of sync. Change a
 price without updating the contract and the suite fails on purpose.
 

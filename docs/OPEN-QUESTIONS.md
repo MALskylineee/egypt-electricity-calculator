@@ -10,20 +10,6 @@ Last reviewed: **2026-08-20**
 
 ## A. Known defects
 
-### DEF-004 — Digit rendering is inconsistent · **severity: low (cosmetic)**
-
-`fmt()` uses `toLocaleString('ar-EG')`, which renders Arabic-Indic digits
-(`١٬٢٣٤٫٥٠`). But the tier table uses `price.toFixed(2)` and the calculator's
-fee box uses raw `tier.fee` — both Latin digits. The same page therefore shows
-`٢٬٣٧٥٫٠٠` and `2.35` side by side, and the calculator card shows a total in
-Arabic-Indic next to a fee in Latin.
-
-Cosmetic only — no figure is wrong.
-
-**Decision needed:** pick one numeral system for the whole UI.
-
----
-
 ### DEF-005 — Slider cannot reach real tier-7 consumption · **severity: low**
 
 `SLIDER_MAX = 1300`, and the track is labelled `1300+`. Tier 7 is unbounded,
@@ -108,6 +94,7 @@ card when it differs from what was typed.
 | DEF-001 | Fractional kWh fell through to tier 7, overstating the bill by up to 5× | v1.1.0 — [ADR-0005](adr/0005-normalise-consumption-to-whole-kwh.md) |
 | DEF-002 | Negative kWh produced a positive tier-7 bill | v1.1.0 — same normalisation |
 | DEF-003 | Reset boundaries duplicated between `TIERS` and `updateSlider()` | v1.1.0 — now derived as `RESET_BOUNDARIES` |
+| DEF-004 | Arabic-Indic and Western digits mixed on the same page | v1.2.0 — [ADR-0006](adr/0006-western-digits-and-unofficial-disclaimer.md) |
 
 ---
 

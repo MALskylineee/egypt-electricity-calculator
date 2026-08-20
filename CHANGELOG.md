@@ -11,11 +11,58 @@ plus a separate `YYYY-MM` tariff schedule version — see
 
 ## [Unreleased]
 
-Remaining items are cosmetic or scope questions, not calculation defects —
-see [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
+No known calculation or presentation defects. Remaining items are scope
+questions — see [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
 
-- **DEF-004** (low) — Arabic-Indic and Latin digits mixed on the same page
 - **DEF-005** (low) — slider capped at 1300 kWh, cannot reach real tier-7 consumption
+
+---
+
+## [1.2.0] — 2026-08-20
+
+Presentation and honesty. **No calculation changed**; every figure is
+identical to v1.1.0. Tariff schedule unchanged (`2026-08`).
+
+### Added
+
+- **An explicit unofficial disclaimer, in Arabic, directly under the hero** —
+  above the calculator, not buried in the footer. It states that the tool is
+  unofficial, unaffiliated with the Ministry of Electricity, the distribution
+  companies or any official body; that it is one person's effort; that the
+  figures **may contain errors or reflect a stale tariff**; and that the
+  official bill from the user's distribution company is the only authoritative
+  reference.
+- `fmtInt()` for whole-kWh quantities, alongside `fmt()` for money.
+- 6 tests asserting no formatter can emit a character in the Arabic-Indic
+  digit ranges, so DEF-004 cannot return silently.
+
+### Fixed
+
+- **DEF-004 — two numeral systems on one page.** `fmt()` and the slider's kWh
+  label used `toLocaleString('ar-EG')`, rendering Arabic-Indic digits
+  (`١٬٢٣٤٫٥٠`), while the tier table, the service fees and *all* of the page's
+  hand-written Arabic copy used Western digits. The calculator card showed a
+  total in one system beside a fee in the other.
+
+  Now unified on Western digits via a single `NUM_LOCALE` constant. Western
+  rather than Arabic-Indic because the distribution company's bill and the
+  meter both use Western digits, and comparing against that bill is the whole
+  point of the tool. Reasoning and the rejected alternative in
+  [ADR-0006](docs/adr/0006-western-digits-and-unofficial-disclaimer.md).
+
+### Changed
+
+- Footer reworded from `حاسبة مرجعية` ("reference calculator") to
+  `حاسبة غير رسمية ومجهود شخصي`, so it no longer contradicts the disclaimer.
+
+### Verified
+
+| Check | Result |
+|---|---|
+| Every figure vs v1.1.0 | ✅ Unchanged — presentation only |
+| Arabic-Indic digits anywhere in the rendered page | ✅ **Zero**, scanned across every leaf element |
+| Disclaimer renders and is visible | ✅ Confirmed in the browser |
+| Test suite | ✅ 57 tests, 57 pass |
 
 ---
 
@@ -147,7 +194,8 @@ See **[Unreleased]** above and
 **entering a decimal consumption value gives a badly inflated bill.** Use whole
 numbers.
 
-[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.0
 [1.1.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.1.0
 [1.0.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.0.1
 [1.0.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.0.0

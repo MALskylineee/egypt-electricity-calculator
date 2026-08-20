@@ -2,8 +2,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadEngine, money } from './engine.mjs';
 
-const { TIERS, tierOf, actualCostNoFee, billOf, SLIDER_MAX, RESET_BOUNDARIES } =
-  loadEngine();
+const { TIERS, tierOf, actualCostNoFee, billOf, SLIDER_MAX, RESET_BOUNDARIES,
+        fmt, fmtInt } = loadEngine();
 
 /* =========================================================================
    1. TARIFF REGISTRY - the frozen contract.
@@ -220,7 +220,57 @@ describe('input normalisation', () => {
 });
 
 /* =========================================================================
-   6. REGRESSION TESTS for fixed defects. See docs/OPEN-QUESTIONS.md history.
+   6. NUMBER FORMATTING.
+   Every figure on the page must use ONE numeral system. The page's Arabic
+   copy, the meter and the real bill all use Western digits, so the
+   formatters must too. See ADR-0006.
+   ========================================================================= */
+describe('number formatting', () => {
+  const ARABIC_INDIC = /[\u0660-\u0669\u06F0-\u06F9]/;
+
+  test('fmt() renders Western digits, never Arabic-Indic', () => {
+    for (const n of [0, 1.5, 79.5, 1234.5, 2932.89]) {
+      const out = fmt(n);
+      assert.ok(!ARABIC_INDIC.test(out), `fmt(${n}) produced "${out}"`);
+    }
+  });
+
+  test('fmtInt() renders Western digits, never Arabic-Indic', () => {
+    for (const n of [0, 300, 1300, 5000]) {
+      const out = fmtInt(n);
+      assert.ok(!ARABIC_INDIC.test(out), `fmtInt(${n}) produced "${out}"`);
+    }
+  });
+
+  test('fmt() always shows exactly two decimal places', () => {
+    assert.equal(fmt(0), '0.00');
+    assert.equal(fmt(35), '35.00');
+    assert.equal(fmt(113.06), '113.06');
+  });
+
+  test('fmtInt() shows no decimal places', () => {
+    assert.equal(fmtInt(300), '300');
+    assert.equal(fmtInt(0), '0');
+  });
+
+  test('thousands are grouped', () => {
+    // The group separator varies by engine and locale data, so require
+    // exactly one non-digit between the groups rather than pinning a comma.
+    assert.match(fmt(2932.89), /^2\D932\.89$/);
+    assert.match(fmtInt(1300), /^1\D300$/);
+  });
+
+  test('every bill on the tier boundaries formats without Arabic-Indic digits', () => {
+    for (const t of TIERS) {
+      const kwh = t.hi === Infinity ? 1300 : t.hi;
+      assert.ok(!ARABIC_INDIC.test(fmt(billOf(kwh))));
+      assert.ok(!ARABIC_INDIC.test(fmtInt(kwh)));
+    }
+  });
+});
+
+/* =========================================================================
+   7. REGRESSION TESTS for fixed defects. See docs/OPEN-QUESTIONS.md history.
    ========================================================================= */
 describe('fixed defects (regression)', () => {
   test('fractional kWh should not fall through to tier 7', () => {

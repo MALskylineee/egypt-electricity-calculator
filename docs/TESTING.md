@@ -15,6 +15,7 @@ No dependencies — the Node built-in test runner. Requires Node 20+.
 | `billOf()` known values | The arithmetic of all three mechanisms, incl. re-baselining |
 | Invariants | Any *future* tariff edit producing a nonsensical schedule |
 | Input normalisation | Fractions, negatives, junk and numeric strings reaching the pricing arithmetic |
+| Number formatting | A figure rendering in the wrong numeral system (DEF-004) |
 | Fixed defects | Regression cover for DEF-001/002 so they cannot come back |
 
 ## How it reaches the code

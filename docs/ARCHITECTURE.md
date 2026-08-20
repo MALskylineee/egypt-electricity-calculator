@@ -12,8 +12,9 @@ index.html
 ├─ <style>   design tokens in :root, then section-scoped rules
 ├─ <body>    5 cards, all content-empty; every value is rendered by JS
 └─ <script>
-   ├─ DATA    TIERS, MECH_TEXT, SLIDER_MAX, RESET_BOUNDARIES
-   ├─ ENGINE  fmt, normalizeKwh, tierOf,
+   ├─ DATA    TIERS, MECH_TEXT, SLIDER_MAX,
+   │          RESET_BOUNDARIES, NUM_LOCALE
+   ├─ ENGINE  fmt, fmtInt, normalizeKwh, tierOf,
    │          actualCostNoFee, billOf                  ← pure, no DOM
    └─ VIEWS   buildTierTable, buildShock, buildTrackBg,
               updateSlider, updateCalculator            ← DOM only
@@ -77,6 +78,13 @@ Full algorithm and worked values: [TARIFF-MODEL.md](TARIFF-MODEL.md).
 `.track-bg` lays tier 1 out at the **right** edge. `updateSlider()` therefore
 positions the thumb with `left: (100 - pct)%`, not `left: pct%`. This is
 correct — do not "fix" it.
+
+**All numbers render with Western digits.** `NUM_LOCALE` pins the numbering
+system to `ar-EG-u-nu-latn` — Arabic locale, Western numerals — because the
+distribution company's bill, the meter and the page's own Arabic copy all use
+them. `fmt()` handles money (2dp), `fmtInt()` handles whole kWh. Changing that
+one constant switches the whole page. See
+[ADR-0006](adr/0006-western-digits-and-unofficial-disclaimer.md).
 
 **Reset boundaries are derived, not hard-coded.** `RESET_BOUNDARIES` comes from
 `TIERS.filter(t => t.mode !== 'cum').map(t => t.lo)`. The proximity warning in

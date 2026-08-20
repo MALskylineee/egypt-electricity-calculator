@@ -44,6 +44,16 @@
     background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
     box-shadow:var(--shadow); padding:26px 26px; margin-bottom:24px;
   }
+
+  /* Unofficial-tool disclaimer */
+  .disclaimer{
+    background:#fffaf0; border:1.5px solid #f0d9a8; border-radius:14px;
+    padding:18px 20px; margin-bottom:24px; display:flex; gap:14px; align-items:flex-start;
+  }
+  .disclaimer .d-icon{font-size:1.5rem; line-height:1.4; flex-shrink:0;}
+  .disclaimer .d-title{font-weight:800; font-size:1rem; margin-bottom:6px; color:#8a5a12;}
+  .disclaimer p{margin:0; font-size:.89rem; color:#5c4a2e; line-height:1.85;}
+  .disclaimer b{color:#7a4a10;}
   .card h2{margin:0 0 6px; font-size:1.25rem; font-weight:800;}
   .card .desc{color:var(--muted); font-size:.92rem; margin:0 0 20px;}
 
@@ -163,6 +173,20 @@
     <div class="icon">⚡</div>
     <h1>حاسبة شرائح الكهرباء المصرية</h1>
     <p>افهم فاتورتك صح، وشوف بنفسك ليه أحيانًا كيلوواط واحد زيادة بيرفعلك الفاتورة بمبلغ كبير مش متوقع.</p>
+  </div>
+
+  <div class="disclaimer">
+    <div class="d-icon">⚠️</div>
+    <div>
+      <div class="d-title">تنويه مهم: الحاسبة دي غير رسمية</div>
+      <p>
+        ده <b>مجهود شخصي فردي</b>، مالوش أي علاقة بوزارة الكهرباء ولا بشركات
+        التوزيع ولا بأي جهة رسمية، ومش معتمد من أي حد. الهدف منه بس إنه
+        يساعدك تفهم إزاي فاتورتك بتتحسب. <b>الأرقام هنا ممكن يكون فيها أخطاء</b>
+        أو تكون التعريفة اتغيرت ولسه مااتحدثتش هنا. متاخدش أي قرار بناءً عليها،
+        و<b>الفاتورة الرسمية من شركة التوزيع بتاعتك هي المرجع الوحيد المعتمد</b>.
+      </p>
+    </div>
   </div>
 
   <div class="card">
@@ -299,7 +323,7 @@
   </div>
 
   <footer>
-    حاسبة مرجعية مبنية على شرائح استهلاك المنازل الرسمية الحالية. الأرقام للتوضيح والفهم، ولأي استفسار دقيق راجع فاتورتك أو شركة التوزيع التابع لها.
+    حاسبة <b>غير رسمية</b> ومجهود شخصي، مبنية على شرائح استهلاك المنازل المُعلنة. الأرقام للتوضيح والفهم وواردٌ فيها الخطأ، ولأي استفسار دقيق راجع فاتورتك أو شركة التوزيع التابع لها.
   </footer>
 </div>
 
@@ -324,7 +348,13 @@ const SLIDER_MAX = 1300;
    the in-app warning pointing at the wrong boundary. */
 const RESET_BOUNDARIES = TIERS.filter(t => t.mode!=='cum').map(t => t.lo);
 
-function fmt(n){ return n.toLocaleString('ar-EG',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+/* Western digits: that is what the distribution company's bill, the meter
+   and this page's own Arabic copy all use, so a user comparing the two is
+   never reading two numeral systems at once. One constant - switch it to
+   'ar-EG' to render Arabic-Indic numerals throughout instead. */
+const NUM_LOCALE = 'ar-EG-u-nu-latn';
+function fmt(n){ return n.toLocaleString(NUM_LOCALE,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtInt(n){ return n.toLocaleString(NUM_LOCALE,{maximumFractionDigits:0}); }
 
 /* Household consumption is a whole number of kWh - that is how the meter is
    read and how the bill is issued. Normalise once, here, so nothing
@@ -415,7 +445,7 @@ function buildTrackBg(){
 function updateSlider(){
   const X = parseInt(document.getElementById('kwhRange').value,10);
   const tier = tierOf(X);
-  document.getElementById('sliderKwhLabel').textContent = X.toLocaleString('ar-EG');
+  document.getElementById('sliderKwhLabel').textContent = fmtInt(X);
   document.getElementById('sliderTierBadge').textContent = 'الشريحة '+tier.n+' · '+MECH_TEXT[tier.mode].short;
   const bill = billOf(X);
   document.getElementById('sliderBill').textContent = fmt(bill)+' ج';

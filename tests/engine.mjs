@@ -34,7 +34,8 @@ export function loadEngine() {
     ';globalThis.TIERS=TIERS;globalThis.tierOf=tierOf;' +
     'globalThis.actualCostNoFee=actualCostNoFee;globalThis.billOf=billOf;' +
     'globalThis.SLIDER_MAX=SLIDER_MAX;globalThis.MECH_TEXT=MECH_TEXT;' +
-    'globalThis.RESET_BOUNDARIES=RESET_BOUNDARIES;globalThis.normalizeKwh=normalizeKwh;';
+    'globalThis.RESET_BOUNDARIES=RESET_BOUNDARIES;globalThis.normalizeKwh=normalizeKwh;' +
+    'globalThis.fmt=fmt;globalThis.fmtInt=fmtInt;globalThis.NUM_LOCALE=NUM_LOCALE;';
 
   const ctx = vm.createContext({});
   vm.runInContext(logic + expose, ctx);
