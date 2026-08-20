@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadEngine, money } from './engine.mjs';
+import { loadEngine, readHtml, money } from './engine.mjs';
 
 const { TIERS, tierOf, actualCostNoFee, billOf, SLIDER_MAX, RESET_BOUNDARIES,
         fmt, fmtInt } = loadEngine();
@@ -289,7 +289,34 @@ describe('number formatting', () => {
 });
 
 /* =========================================================================
-   7. REGRESSION TESTS for fixed defects. See docs/OPEN-QUESTIONS.md history.
+   7. SEARCH-ENGINE VISIBILITY.
+   The page is deliberately kept out of search results - it is unofficial and
+   shared by link, not found by search. See ADR-0008. If the owner decides to
+   open it up, delete this block in the same commit as the meta tag.
+   ========================================================================= */
+describe('search engine visibility', () => {
+  const html = readHtml();
+
+  test('the page carries a robots meta tag', () => {
+    assert.match(html, /<meta\s+name=["']robots["']/i,
+      'the robots meta tag is missing from index.html');
+  });
+
+  test('that tag tells crawlers not to index the page', () => {
+    const tag = html.match(/<meta\s+name=["']robots["'][^>]*>/i)[0];
+    assert.match(tag, /noindex/i, `robots tag does not say noindex: ${tag}`);
+    assert.match(tag, /nofollow/i, `robots tag does not say nofollow: ${tag}`);
+  });
+
+  test('the tag is inside <head>, where crawlers read it', () => {
+    const head = html.slice(0, html.indexOf('</head>'));
+    assert.match(head, /<meta\s+name=["']robots["']/i,
+      'the robots tag is outside <head> and will be ignored');
+  });
+});
+
+/* =========================================================================
+   8. REGRESSION TESTS for fixed defects. See docs/OPEN-QUESTIONS.md history.
    ========================================================================= */
 describe('fixed defects (regression)', () => {
   test('fractional kWh should not fall through to tier 7', () => {

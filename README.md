@@ -87,6 +87,11 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 
 ## ⚠️ Before you trust a number
 
+- **Not listed in search engines.** The page carries
+  `<meta name="robots" content="noindex, nofollow, noarchive">` on purpose —
+  it is shared by link, not found by searching. See
+  [ADR-0008](docs/adr/0008-keep-the-page-out-of-search-results.md). Note this
+  covers the *page*; the repository itself is public and indexed on github.com.
 - **Unofficial and indicative.** See the disclaimer above. Figures come from
   the published tariff schedule; your distribution company's official tariff is
   authoritative.
@@ -111,7 +116,7 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the file is laid out, the pure/DOM split, why the RTL slider maths looks backwards. |
 | [TESTING.md](docs/TESTING.md) | How the suite reaches code that lives inside an HTML file. |
 | [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | Known defects with severity and evidence; unresolved tariff questions and who owns them. |
-| [ADRs](docs/adr/) | Why single-file, why publish with defects intact, why tests extract from HTML, how versioning works, why consumption is rounded to whole kWh, why Western digits. |
+| [ADRs](docs/adr/) | Why single-file, why publish with defects intact, why tests extract from HTML, how versioning works, why consumption is rounded to whole kWh, why Western digits, why the tariff framing is not a bill, why the page is kept out of search results. |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each release. |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | The rules that keep the tariff contract honest. |
 
@@ -121,7 +126,7 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 npm test
 ```
 
-57 tests, no dependencies, Node 20+. They run against the real `index.html` —
+61 tests, no dependencies, Node 20+. They run against the real `index.html` —
 there is no second copy of the tariff logic to drift out of sync. Change a
 price without updating the contract and the suite fails on purpose.
 

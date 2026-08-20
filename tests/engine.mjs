@@ -42,5 +42,10 @@ export function loadEngine() {
   return ctx;
 }
 
+/** The raw page source, for assertions about markup rather than logic. */
+export function readHtml() {
+  return fs.readFileSync(HTML, 'utf8');
+}
+
 /** Round to 2dp for money comparisons. */
 export const money = (n) => Math.round(n * 100) / 100;

@@ -18,6 +18,44 @@ questions — see [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
 
 ---
 
+## [1.3.2] — 2026-08-20
+
+Keeps the page out of search results. No calculation or visible content
+changed.
+
+### Added
+
+- `<meta name="robots" content="noindex, nofollow, noarchive">` in `<head>`.
+  The page stays live and anyone with the link can open it — it simply will
+  not be *found* by searching. `noarchive` prevents a cached snapshot of a
+  figure that is later corrected.
+
+  Verified beforehand that nothing was already blocking crawlers: no
+  `robots.txt` at the domain root (404, which means "crawl everything"), no
+  `X-Robots-Tag` header from GitHub Pages, no `noindex` tag. The site was
+  fully open to indexing.
+- 3 tests asserting the tag is present, says `noindex`/`nofollow`, and sits
+  inside `<head>` where crawlers read it. Confirmed failing (3 failures) with
+  the tag removed before being confirmed passing with it restored.
+- `readHtml()` in the test harness, for assertions about markup rather than
+  logic.
+
+### Not added
+
+**No `robots.txt`** — one in this repository would do nothing. Crawlers read
+`robots.txt` only from the domain root
+(`malskylineee.github.io/robots.txt`); a file here is served under
+`/egypt-electricity-calculator/` where no crawler consults it. Adding one
+anyway would look like protection while providing none. Reasoning in
+[ADR-0008](docs/adr/0008-keep-the-page-out-of-search-results.md).
+
+### Note
+
+This covers the **page**. The GitHub repository is still public and indexed on
+github.com; `noindex` on the Pages site does not change that.
+
+---
+
 ## [1.3.1] — 2026-08-20
 
 Two tariff facts confirmed by the owner. **No code or figure changed** — the
@@ -289,7 +327,8 @@ See **[Unreleased]** above and
 **entering a decimal consumption value gives a badly inflated bill.** Use whole
 numbers.
 
-[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.3.2
 [1.3.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.3.1
 [1.3.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.3.0
 [1.2.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.1
