@@ -6,9 +6,17 @@
 > two are bugs.
 
 **Tariff schedule version:** `2026-08` (post 12% increase)
+**Effective from:** **1 August 2026** — the last applied amendment. This date
+is also shown on the page itself and must be updated there in the same commit
+as any price change.
 **Sector:** Residential / household (`منزلي`) only. Commercial, industrial and
 agricultural tariffs are **out of scope**.
-**Billing period:** one calendar month, per meter.
+**Settlement:** The primary audience is on **prepaid card meters**
+(`عدادات بكارت شحن`) — there is no monthly invoice; credit is loaded and drawn
+down. The tier structure, prices and service fees are the same schedule for
+postpaid accounts, so the model serves both; only the settlement mechanism
+differs. See [ADR-0007](adr/0007-prepaid-framing-and-tariff-date.md).
+**Accounting period:** one calendar month, per meter.
 
 ---
 
@@ -171,6 +179,8 @@ Deliberately **not** modelled. Do not add these without an ADR:
 
 - VAT, stamp duty, municipal or lighting levies
 - Arrears, instalments, meter rental, reconnection charges
-- Prepaid (`كودي` / card) meter behaviour, which can differ
+- Top-up mechanics for prepaid meters — remaining credit, how long a given
+  top-up lasts, mid-month partial charges. The tool prices a month's
+  consumption; it does not model the balance on the card.
 - Non-residential tariffs
 - Historical schedules and back-dated recalculation

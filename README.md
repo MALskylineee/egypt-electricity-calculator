@@ -4,8 +4,8 @@
 
 **Egypt Electricity Tier Calculator**
 
-Understand your bill — and see for yourself why one extra kilowatt-hour
-can add hundreds of pounds to it.
+افهم تسعيرة استهلاكك واحسبها صح — and see for yourself why one extra
+kilowatt-hour can cost hundreds of pounds.
 
 [![CI](https://github.com/MALskylineee/egypt-electricity-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/MALskylineee/egypt-electricity-calculator/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/MALskylineee/egypt-electricity-calculator)](https://github.com/MALskylineee/egypt-electricity-calculator/releases)
@@ -22,22 +22,28 @@ can add hundreds of pounds to it.
 >
 > ده **مجهود شخصي فردي**، مالوش أي علاقة بوزارة الكهرباء ولا بشركات التوزيع
 > ولا بأي جهة رسمية، ومش معتمد من أي حد. الهدف منه بس إنه يساعدك تفهم إزاي
-> فاتورتك بتتحسب. **الأرقام هنا ممكن يكون فيها أخطاء** أو تكون التعريفة اتغيرت
-> ولسه مااتحدثتش هنا. متاخدش أي قرار بناءً عليها، و**الفاتورة الرسمية من شركة
+> تسعيرة استهلاكك بتتحسب. **الأرقام هنا ممكن يكون فيها أخطاء** أو تكون التعريفة اتغيرت
+> ولسه مااتحدثتش هنا. متاخدش أي قرار بناءً عليها، و**التعريفة الرسمية المُعلنة من شركة
 > التوزيع بتاعتك هي المرجع الوحيد المعتمد**.
 >
 > ### ⚠️ This is an unofficial tool
 >
 > **A solo personal effort.** Not affiliated with, endorsed by, or connected to
 > the Egyptian Ministry of Electricity, any distribution company, or any
-> official body. It exists only to help people understand how their bill is
-> calculated. **The figures may contain errors** or reflect a tariff that has
-> since changed. Do not make decisions based on them — **your distribution
-> company's official bill is the only authoritative reference.**
+> official body. It exists only to help people understand how the tariff on their
+> consumption is calculated. **The figures may contain errors** or reflect a tariff that has
+> since changed. Do not make decisions based on them — **the official published
+> tariff from your distribution company is the only authoritative reference.**
 
 ---
 
 ## ما هذا؟ · What this is
+
+Egyptian households on **prepaid card meters** (`عدادات بكارت شحن`) never see a
+monthly invoice — credit is loaded onto a card and drawn down as electricity is
+used. So this is not a "understand your bill" tool. It answers the question
+that actually matters: **what does my consumption cost under the tariff, and
+have I calculated it correctly?**
 
 Most Egyptian electricity calculators assume the tariff is a plain progressive
 schedule — each tier's price applied only to the kWh inside it. **It isn't.**
@@ -46,15 +52,16 @@ Three tiers behave differently: crossing into tier 3, 6 or 7 **discards the
 whole calculation and re-prices every kilowatt-hour you used that month** at
 the new tier's rate. That is why bills jump the way they do:
 
-| You go from | to | Your bill rises by | The extra kWh is worth |
+| You go from | to | Your cost rises by | The extra kWh is worth |
 |---|---|---|---|
 | 100 kWh | 101 kWh | **+33.56 EGP** | 1.06 EGP |
 | 650 kWh | 651 kWh | **+412.85 EGP** | 2.35 EGP |
 | 1000 kWh | 1001 kWh | **+557.89 EGP** | 2.89 EGP |
 
 Crossing into tier 6 costs **176 times** what the kilowatt-hour that triggered
-it is actually worth. This tool exists to make that visible before it lands on
-your bill.
+it is actually worth. On a prepaid meter that is not an end-of-month surprise —
+it is credit vanishing the moment you cross the line. This tool exists to make
+that visible beforehand.
 
 ## What's in it
 
@@ -80,12 +87,16 @@ start index.html      # Windows   (macOS: open · Linux: xdg-open)
 
 ## ⚠️ Before you trust a number
 
-- **Unofficial and indicative, not a bill.** See the disclaimer above. Figures
-  come from the published tariff schedule; your distribution company's invoice
-  is authoritative.
-- **Tariff schedule `2026-08`.** Residential/household only.
+- **Unofficial and indicative.** See the disclaimer above. Figures come from
+  the published tariff schedule; your distribution company's official tariff is
+  authoritative.
+- **Tariff schedule `2026-08`, effective 1 August 2026** — the last applied
+  amendment. If the tariff has changed since, these figures are stale.
+  Residential/household only.
 - **Not modelled:** VAT and levies, arrears, instalments, meter rental,
-  prepaid (كودي) meter behaviour, non-residential tariffs.
+  non-residential tariffs, or prepaid top-up mechanics (remaining credit, how
+  long a top-up lasts). This prices a month's consumption, not the balance on
+  your card.
 - **Consumption is rounded to a whole kWh** — `450.7` is treated as `451`.
   That is how meters are read and bills are issued
   ([ADR-0005](docs/adr/0005-normalise-consumption-to-whole-kwh.md)).

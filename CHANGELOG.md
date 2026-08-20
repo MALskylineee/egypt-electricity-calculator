@@ -18,6 +18,51 @@ questions — see [OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
 
 ---
 
+## [1.3.0] — 2026-08-20
+
+Corrects a wrong premise in the copy, and states the tariff date on the page.
+**No calculation changed.**
+
+### Changed
+
+- **The page no longer talks about a "bill".** The households this tool is for
+  are on **prepaid card meters** (`عدادات بكارت شحن`) — there is no monthly
+  invoice; credit is loaded onto a card and drawn down. Telling such a reader
+  to `راجع فاتورتك` pointed at a document that does not exist, and
+  `الإجمالي المطلوب دفعه` described a payment already made at top-up time.
+
+  Reframed around the tariff, in the owner's own words:
+  **`افهم تسعيرة استهلاكك واحسبها صح`**. Nine places changed —
+  `فاتورة` → `التكلفة`, `الإجمالي المطلوب دفعه` → `إجمالي تكلفة الاستهلاك`,
+  and the disclaimer and footer now point at the **published official tariff**
+  rather than at a bill.
+- README reframed to match, in both languages.
+
+### Added
+
+- **The tariff date, on the page**, under the tier table:
+  `التعريفة محسوبة على آخر تعديل مُطبَّق بتاريخ 1 أغسطس 2026` — with an explicit
+  note that the figures go stale if the tariff moves after that date.
+  (Resolves OQ-001.)
+- `docs/TARIFF-MODEL.md` now records the effective date and the prepaid
+  settlement context alongside the schedule version.
+
+### Resolved
+
+| ID | Question | Answer |
+|---|---|---|
+| OQ-001 | Should the page state a tariff effective date? | Yes — now shown under the tier table |
+| OQ-005 | Prepaid or postpaid? | Prepaid is the primary audience. The tier schedule is identical for both, so the copy is settlement-neutral rather than prepaid-only — see [ADR-0007](docs/adr/0007-prepaid-framing-and-tariff-date.md) |
+
+### Opened
+
+- **OQ-007** — whether the per-tier service fee (`الرسوم الإدارية`) is deducted
+  from prepaid credit exactly as modelled: once per month, following the tier
+  reached. Low impact (1–40 EGP), but it is the one part of the model whose
+  prepaid behaviour is unverified.
+
+---
+
 ## [1.2.1] — 2026-08-20
 
 Wording only. No calculation, figure or layout changed.
@@ -215,7 +260,8 @@ See **[Unreleased]** above and
 **entering a decimal consumption value gives a badly inflated bill.** Use whole
 numbers.
 
-[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/MALskylineee/egypt-electricity-calculator/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.3.0
 [1.2.1]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.1
 [1.2.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.2.0
 [1.1.0]: https://github.com/MALskylineee/egypt-electricity-calculator/releases/tag/v1.1.0

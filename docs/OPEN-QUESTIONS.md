@@ -21,16 +21,6 @@ visual explorer is.
 
 ## B. Open questions
 
-### OQ-001 — Should the tool state a tariff effective date in the UI? · blocks: nothing
-
-The footer says the figures are indicative, but the page never says *which*
-schedule it implements. A user comparing against an older bill has no way to
-tell. A dated line under the tier table would fix it.
-
-**Owner:** Mohamed. **Proposal:** add `التعريفة سارية من أغسطس 2026`.
-
----
-
 ### OQ-002 — Confirm the tier 7 price (2.89) · blocks: numeric accuracy above 1000 kWh
 
 Every other tier is consistent with *EgyptERA base × 1.12*. Tier 7 is not:
@@ -64,13 +54,18 @@ updated in `updateSlider()` to announce tier and bill.
 
 ---
 
-### OQ-005 — Does the reset rule apply to prepaid (كودي) meters? · blocks: scope claim
+### OQ-007 — Is the service fee deducted from prepaid credit as modelled? · blocks: accuracy of the fee line
 
-The tool implicitly models postpaid billing. Prepaid/card meters are widely
-reported to behave differently at tier boundaries. The tool currently makes no
-statement either way.
+The tool adds one per-tier customer service fee (`الرسوم الإدارية`, 1–40 EGP)
+to a month's consumption. On a postpaid invoice that is a single monthly line.
+On a **prepaid card meter** it is unconfirmed whether the fee is deducted once
+per month, taken at top-up time, or split across top-ups — and whether the
+amount charged follows the tier reached, as modelled here.
 
-**Owner:** Mohamed — this is a domain call, not a code call.
+Low impact on the total (1–40 EGP against hundreds), but it is the one part of
+the model whose prepaid behaviour has not been checked.
+
+**Owner:** Mohamed — needs a real prepaid meter's deduction history.
 
 ---
 
@@ -95,6 +90,13 @@ card when it differs from what was typed.
 | DEF-002 | Negative kWh produced a positive tier-7 bill | v1.1.0 — same normalisation |
 | DEF-003 | Reset boundaries duplicated between `TIERS` and `updateSlider()` | v1.1.0 — now derived as `RESET_BOUNDARIES` |
 | DEF-004 | Arabic-Indic and Western digits mixed on the same page | v1.2.0 — [ADR-0006](adr/0006-western-digits-and-unofficial-disclaimer.md) |
+
+### Resolved questions
+
+| ID | Question | Answer |
+|---|---|---|
+| OQ-001 | Should the page state a tariff effective date? | Yes — v1.3.0 shows `1 أغسطس 2026` under the tier table |
+| OQ-005 | Does the tool model prepaid or postpaid meters? | Prepaid card meters are the primary audience; the schedule is the same for both, so the copy is settlement-neutral. [ADR-0007](adr/0007-prepaid-framing-and-tariff-date.md) |
 
 ---
 
